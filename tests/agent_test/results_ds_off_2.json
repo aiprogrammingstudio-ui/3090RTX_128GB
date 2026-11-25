@@ -1,0 +1,375 @@
+{
+ "label": "ds_off_2",
+ "model": "inkling-2-mini",
+ "date": "2026-11-25 08:29",
+ "tools": {
+  "t01_simple": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2021"
+     }
+    }
+   ],
+   "answer": "Listing G-2021 has a battery health of 86%.",
+   "bad_json": 0,
+   "seconds": 1.4,
+   "tokens": 123
+  },
+  "t02_enum_filter": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "max_price": 1500,
+      "status": "available"
+     }
+    }
+   ],
+   "answer": "- G-2021 — €1,450\n- G-2018 — €980",
+   "bad_json": 0,
+   "seconds": 1.5,
+   "tokens": 128
+  },
+  "t03_chain": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "available"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2018"
+     }
+    }
+   ],
+   "answer": "The cheapest available Gazelle is the **Gazelle Arroyo C7** (G-2018) at **€980**, and it has done **21,000 km**.",
+   "bad_json": 0,
+   "seconds": 2.5,
+   "tokens": 215
+  },
+  "t04_parallel": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_weather",
+     "args": {
+      "city": "Amersfoort",
+      "date": "2026-11-24"
+     }
+    },
+    {
+     "name": "get_weather",
+     "args": {
+      "city": "Utrecht",
+      "date": "2026-11-24"
+     }
+    }
+   ],
+   "answer": "Utrecht will be drier tomorrow — about 0.5 mm of rain versus 4.5 mm in Amersfoort.",
+   "bad_json": 0,
+   "seconds": 2.5,
+   "tokens": 231
+  },
+  "t05_error_recovery": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G2018"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Batavus",
+      "status": "any"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "any"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Sparta",
+      "status": "any"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2018"
+     }
+    }
+   ],
+   "answer": "Here are the details for the Gazelle Arroyo C7 (id **G-2018**):\n\n- **Brand:** Gazelle\n- **Year:** 2018\n- **Price:** €980\n- **Battery:** 400 Wh, 71% health\n- **Mileage:** 21,000 km\n- **Status:** available\n\nNote: the ID is \"G-2018\", not \"G2018\" — the exact ID you gave wasn't found, but this is the Arroyo listing.",
+   "bad_json": 0,
+   "seconds": 5.1,
+   "tokens": 459
+  },
+  "t06_no_tool": {
+   "ok": true,
+   "calls": [],
+   "answer": "Cold temperatures slow the battery’s internal chemical reactions and increase internal resistance, so the e-bike has less usable capacity and feels weaker in winter.",
+   "bad_json": 0,
+   "seconds": 1.3,
+   "tokens": 121
+  },
+  "t07_files_sum": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "list_files",
+     "args": {
+      "prefix": "sales"
+     }
+    },
+    {
+     "name": "read_file",
+     "args": {
+      "path": "sales/2026-10.csv"
+     }
+    }
+   ],
+   "answer": "October 2026 sales revenue was **€2,680** (640 + 1,150 + 890).",
+   "bad_json": 0,
+   "seconds": 2.6,
+   "tokens": 237
+  },
+  "t08_dates": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "B-2019"
+     }
+    },
+    {
+     "name": "create_event",
+     "args": {
+      "date": "2026-11-28",
+      "end": "12:00",
+      "start": "11:00",
+      "title": "Pickup B-2019 (Sanne)"
+     }
+    }
+   ],
+   "answer": "Drafted: Saturday 28 November 2026, 11:00–12:00, “Pickup B-2019 (Sanne)”. It’s pending approval. Listing B-2019 (Batavus Finez E-go, 2019, €750) is available.",
+   "bad_json": 0,
+   "seconds": 5.5,
+   "tokens": 537
+  },
+  "t09_nested_args": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Done — draft invoice created (id: draft-1), pending your approval:\n\n- Batavus Finez E-go (used) × 1 @ €700 — 0% VAT (margin scheme)\n- Bike lock × 2 @ €35 — 0% VAT\n\nTotal: €770, 0% VAT. Note: locks are goods, not used bikes — if you'd like, the locks could be invoiced at 21% VAT instead; let me know and I can adjust.",
+   "bad_json": 0,
+   "seconds": 10.5,
+   "tokens": 1085
+  },
+  "t10_status_trap": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Sparta",
+      "status": "any"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "S-2020"
+     }
+    }
+   ],
+   "answer": "No — the Sparta M7b (listing S-2020, 2020, €1,100, 12,500 km, 80% battery health) is marked **sold**, so it's no longer for sale. If the buyer wants, I can check for similar available Sparta or Gazelle/Batavus models.",
+   "bad_json": 0,
+   "seconds": 3.0,
+   "tokens": 270
+  }
+ },
+ "code": {
+  "c01_parse_price": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "",
+     "raw": "",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmpa_0kiya4/t.py\", line 3, in <module>\n    assert parse_price('€ 1.450,-') == 1450.0\n           ^^^^^^^^^^^\nNameError: name 'parse_price' is not defined\n",
+     "finish": "length",
+     "reasoning_chars": 19608
+    },
+    {
+     "ok": true,
+     "code": "def parse_price(s: str) -> float | None:\n    if not isinstance(s, str):\n        return None\n    s = s.replace('\\xa0', ' ').strip()\n    if not s:\n        return None\n    cleaned = ''.join(ch for ch in s if ch != '€' and ch != ' ')\n    if not cleaned:\n        return None\n    if cleaned.lower().startswith('gratis'):\n        return 0.0\n    if any(ch not in '0123456789.,-' for ch in cleaned):\n        return None\n    cleaned = cleaned.replace('.', '')\n    if ',' in cleaned:\n        int_part, _, dec_part = cleaned.partition(',')\n        dec_part = dec_part.replace('-', '')\n        if not int_part.isdigit():\n            return None\n        if not dec_part:\n            dec_part = '0'\n        if not dec_part.isdigit():\n            return None\n        return float(int_part + '.' + dec_part)\n    if cleaned.isdigit():\n        return float(cleaned)\n    return None\n",
+     "raw": "```python\ndef parse_price(s: str) -> float | None:\n    if not isinstance(s, str):\n        return None\n    s = s.replace('\\xa0', ' ').strip()\n    if not s:\n        return None\n    cleaned = ''.join(ch for ch in s if ch != '€' and ch != ' ')\n    if not cleaned:\n        return None\n    if cleaned.lower().startswith('gratis'):\n        return 0.0\n    if any(ch not in '0123456789.,-' for ch in cleaned):\n        return None\n    cleaned = cleaned.replace('.', '')\n    if ',' in cleaned:\n        int_part, _, dec_part = cleaned.partition(',')\n        dec_part = dec_part.replace('-', '')\n        if not int_part.isdigit():\n            return None\n        if not dec_part:\n            dec_part = '0'\n        if not dec_part.isdigit():\n            return None\n        return float(int_part + '.' + dec_part)\n    if cleaned.isdigit():\n        return float(cleaned)\n    return None\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 12635
+    }
+   ],
+   "seconds": 119.6,
+   "tokens": 12684,
+   "pass1": false,
+   "pass2": true
+  },
+  "c02_postcode": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "import re\n\ndef is_valid_postcode(s: str) -> bool:\n    if not isinstance(s, str):\n        return False\n    m = re.fullmatch(r'([1-9][0-9]{3})( )?([A-Za-z]{2})', s)\n    if m is None:\n        return False\n    letters = m.group(2).upper()\n    return letters not in {'SA', 'SD', 'SS'}\n",
+     "raw": "```python\nimport re\n\ndef is_valid_postcode(s: str) -> bool:\n    if not isinstance(s, str):\n        return False\n    m = re.fullmatch(r'([1-9][0-9]{3})( )?([A-Za-z]{2})', s)\n    if m is None:\n        return False\n    letters = m.group(2).upper()\n    return letters not in {'SA', 'SD', 'SS'}\n```",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmppvm9me0a/t.py\", line 14, in <module>\n    assert is_valid_postcode('3811ab')\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/tmppvm9me0a/t.py\", line 9, in is_valid_postcode\n    letters = m.group(2).upper()\n              ^^^^^^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'upper'\n",
+     "finish": "stop",
+     "reasoning_chars": 1727
+    },
+    {
+     "ok": true,
+     "code": "import re\n\ndef is_valid_postcode(s: str) -> bool:\n    if not isinstance(s, str):\n        return False\n    m = re.fullmatch(r'([1-9][0-9]{3})( )?([A-Za-z]{2})', s)\n    if m is None:\n        return False\n    letters = m.group(3).upper()\n    return letters not in {'SA', 'SD', 'SS'}\n",
+     "raw": "```python\nimport re\n\ndef is_valid_postcode(s: str) -> bool:\n    if not isinstance(s, str):\n        return False\n    m = re.fullmatch(r'([1-9][0-9]{3})( )?([A-Za-z]{2})', s)\n    if m is None:\n        return False\n    letters = m.group(3).upper()\n    return letters not in {'SA', 'SD', 'SS'}\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 732
+    }
+   ],
+   "seconds": 10.5,
+   "tokens": 1104,
+   "pass1": false,
+   "pass2": true
+  },
+  "c03_next_slot": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import datetime\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    current_date = now.date()\n    while True:\n        weekday = current_date.weekday()\n        if weekday <= 4:\n            window_start = datetime.time(18, 0)\n            window_end = datetime.time(21, 0)\n        elif weekday == 5:\n            window_start = datetime.time(10, 0)\n            window_end = datetime.time(16, 0)\n        else:\n            current_date += datetime.timedelta(days=1)\n            continue\n\n        slot = datetime.datetime.combine(current_date, window_start)\n        end = datetime.datetime.combine(current_date, window_end)\n        while slot < end:\n            if slot >= now:\n                return slot\n            slot += datetime.timedelta(minutes=30)\n\n        current_date += datetime.timedelta(days=1)\n",
+     "raw": "```python\nimport datetime\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    current_date = now.date()\n    while True:\n        weekday = current_date.weekday()\n        if weekday <= 4:\n            window_start = datetime.time(18, 0)\n            window_end = datetime.time(21, 0)\n        elif weekday == 5:\n            window_start = datetime.time(10, 0)\n            window_end = datetime.time(16, 0)\n        else:\n            current_date += datetime.timedelta(days=1)\n            continue\n\n        slot = datetime.datetime.combine(current_date, window_start)\n        end = datetime.datetime.combine(current_date, window_end)\n        while slot < end:\n            if slot >= now:\n                return slot\n            slot += datetime.timedelta(minutes=30)\n\n        current_date += datetime.timedelta(days=1)\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 4195
+    }
+   ],
+   "seconds": 13.4,
+   "tokens": 1422,
+   "pass1": true,
+   "pass2": true
+  },
+  "c04_dedupe": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "def dedupe(listings: list[dict]) -> list[dict]:\n    def normalize_title(title: str) -> str:\n        return ' '.join(title.split()).lower()\n\n    best = {}  # key -> index of the earliest-dated item\n    for i, item in enumerate(listings):\n        key = (normalize_title(item['title']), item['price'])\n        j = best.get(key)\n        if j is None or item['date'] < listings[j]['date']:\n            best[key] = i\n\n    return [listings[i] for i in sorted(best.values())]\n",
+     "raw": "```python\ndef dedupe(listings: list[dict]) -> list[dict]:\n    def normalize_title(title: str) -> str:\n        return ' '.join(title.split()).lower()\n\n    best = {}  # key -> index of the earliest-dated item\n    for i, item in enumerate(listings):\n        key = (normalize_title(item['title']), item['price'])\n        j = best.get(key)\n        if j is None or item['date'] < listings[j]['date']:\n            best[key] = i\n\n    return [listings[i] for i in sorted(best.values())]\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 3009
+    }
+   ],
+   "seconds": 9.5,
+   "tokens": 1004,
+   "pass1": true,
+   "pass2": true
+  },
+  "c05_fix_bug": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "def add_tag(tag, tags=None):\n    if tags is None:\n        tags = []\n    new_tags = list(tags)\n    if tag not in new_tags:\n        new_tags.append(tag)\n    return sorted(new_tags)\n",
+     "raw": "```python\ndef add_tag(tag, tags=None):\n    if tags is None:\n        tags = []\n    new_tags = list(tags)\n    if tag not in new_tags:\n        new_tags.append(tag)\n    return sorted(new_tags)\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 2934
+    }
+   ],
+   "seconds": 8.5,
+   "tokens": 900,
+   "pass1": true,
+   "pass2": true
+  },
+  "c06_csv_totals": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import csv\nimport io\n\n\ndef totals_by_payment(csv_text: str) -> dict[str, int]:\n    totals: dict[str, int] = {}\n    reader = csv.DictReader(io.StringIO(csv_text))\n    for row in reader:\n        if not row:\n            continue\n        price_raw = (row.get(\"price\") or \"\").strip()\n        payment = (row.get(\"payment\") or \"\").strip().lower()\n        if not price_raw or not payment:\n            continue\n        price = int(price_raw.replace(\",\", \"\"))\n        totals[payment] = totals.get(payment, 0) + price\n    return totals\n",
+     "raw": "```python\nimport csv\nimport io\n\n\ndef totals_by_payment(csv_text: str) -> dict[str, int]:\n    totals: dict[str, int] = {}\n    reader = csv.DictReader(io.StringIO(csv_text))\n    for row in reader:\n        if not row:\n            continue\n        price_raw = (row.get(\"price\") or \"\").strip()\n        payment = (row.get(\"payment\") or \"\").strip().lower()\n        if not price_raw or not payment:\n            continue\n        price = int(price_raw.replace(\",\", \"\"))\n        totals[payment] = totals.get(payment, 0) + price\n    return totals\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 2236
+    }
+   ],
+   "seconds": 7.9,
+   "tokens": 839,
+   "pass1": true,
+   "pass2": true
+  },
+  "c07_retry": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import time\n\ndef retry(fn, attempts=3, exceptions=(Exception,), sleep=time.sleep, base_delay=1.0):\n    for i in range(attempts):\n        try:\n            return fn()\n        except exceptions:\n            if i == attempts - 1:\n                raise\n            sleep(base_delay * (2 ** i))\n",
+     "raw": "```python\nimport time\n\ndef retry(fn, attempts=3, exceptions=(Exception,), sleep=time.sleep, base_delay=1.0):\n    for i in range(attempts):\n        try:\n            return fn()\n        except exceptions:\n            if i == attempts - 1:\n                raise\n            sleep(base_delay * (2 ** i))\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 2287
+    }
+   ],
+   "seconds": 6.5,
+   "tokens": 687,
+   "pass1": true,
+   "pass2": true
+  },
+  "c08_extract_json": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import json\n\n\ndef extract_json(text: str):\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n    start = 0\n\n    while True:\n        i = text.find('{', start)\n        if i == -1:\n            return None\n        try:\n            obj, _ = decoder.raw_decode(text, i)\n        except json.JSONDecodeError:\n            start = i + 1\n            continue\n        if isinstance(obj, dict):\n            return obj\n        start = i + 1\n",
+     "raw": "```python\nimport json\n\n\ndef extract_json(text: str):\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n    start = 0\n\n    while True:\n        i = text.find('{', start)\n        if i == -1:\n            return None\n        try:\n            obj, _ = decoder.raw_decode(text, i)\n        except json.JSONDecodeError:\n            start = i + 1\n            continue\n        if isinstance(obj, dict):\n            return obj\n        start = i + 1\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 4745
+    }
+   ],
+   "seconds": 13.6,
+   "tokens": 1446,
+   "pass1": true,
+   "pass2": true
+  }
+ }
+}

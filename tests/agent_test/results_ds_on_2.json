@@ -1,0 +1,395 @@
+{
+ "label": "ds_on_2",
+ "model": "inkling-2-mini",
+ "date": "2026-11-25 08:23",
+ "tools": {
+  "t01_simple": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2021"
+     }
+    }
+   ],
+   "answer": "The battery health of listing G-2021 is 86%.",
+   "bad_json": 0,
+   "seconds": 0.8,
+   "tokens": 125
+  },
+  "t02_enum_filter": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "max_price": 1500,
+      "status": "available"
+     }
+    }
+   ],
+   "answer": "G-2021 — €1,450\nG-2018 — €980",
+   "bad_json": 0,
+   "seconds": 1.1,
+   "tokens": 181
+  },
+  "t03_chain": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "available"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2018"
+     }
+    }
+   ],
+   "answer": "The cheapest available Gazelle is the **Gazelle Arroyo C7** (G-2018) at **€980**, and it has done **21,000 km**.",
+   "bad_json": 0,
+   "seconds": 1.4,
+   "tokens": 229
+  },
+  "t04_parallel": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_weather",
+     "args": {
+      "city": "Amersfoort",
+      "date": "2026-11-24"
+     }
+    },
+    {
+     "name": "get_weather",
+     "args": {
+      "city": "Utrecht",
+      "date": "2026-11-24"
+     }
+    }
+   ],
+   "answer": "Utrecht — tomorrow it’s forecast around 0.5 mm of rain, vs 4.5 mm in Amersfoort.",
+   "bad_json": 0,
+   "seconds": 1.5,
+   "tokens": 286
+  },
+  "t05_error_recovery": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G2018"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Batavus",
+      "status": "any"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "any"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Sparta",
+      "status": "any"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2018"
+     }
+    }
+   ],
+   "answer": "The listing you meant is **G-2018** (Gazelle Arroyo C7) — note the id uses a hyphen, so \"G2018\" doesn't exist directly. Details:\n\n- **Title:** Gazelle Arroyo C7\n- **Brand:** Gazelle\n- **Year:** 2018\n- **Price:** €980\n- **Battery:** 400 Wh, health 71%\n- **Mileage:** 21,000 km\n- **Status:** available",
+   "bad_json": 0,
+   "seconds": 2.7,
+   "tokens": 481
+  },
+  "t06_no_tool": {
+   "ok": true,
+   "calls": [],
+   "answer": "Cold temperatures slow the chemical reactions inside lithium-ion batteries, so less energy is available and usable capacity drops in winter.",
+   "bad_json": 0,
+   "seconds": 1.0,
+   "tokens": 120
+  },
+  "t07_files_sum": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "list_files",
+     "args": {
+      "prefix": "sales"
+     }
+    },
+    {
+     "name": "read_file",
+     "args": {
+      "path": "sales/2026-10.csv"
+     }
+    }
+   ],
+   "answer": "October 2026 sales revenue was **€2,680** (3 sales):\n\n- 2026-10-03: K-11 — €640 (cash)\n- 2026-10-12: K-14 — €1,150 (tikkie)\n- 2026-10-28: K-19 — €890 (cash)",
+   "bad_json": 0,
+   "seconds": 2.0,
+   "tokens": 341
+  },
+  "t08_dates": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "B-2019"
+     }
+    },
+    {
+     "name": "create_event",
+     "args": {
+      "date": "2026-11-28",
+      "end": "12:00",
+      "start": "11:00",
+      "title": "Pickup B-2019 (Sanne)"
+     }
+    }
+   ],
+   "answer": "Done — draft calendar event created: **Pickup B-2019 (Sanne)**, Saturday 28 November 2026, 11:00–12:00. It's a draft pending your approval. Listing B-2019 (Batavus Finez E-go, €750) is available.",
+   "bad_json": 0,
+   "seconds": 3.0,
+   "tokens": 556
+  },
+  "t09_nested_args": {
+   "ok": false,
+   "calls": [
+    {
+     "name": "list_files",
+     "args": {}
+    },
+    {
+     "name": "read_file",
+     "args": {
+      "path": "notes.txt"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Batavus",
+      "max_price": 700,
+      "status": "available"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Batavus",
+      "status": "any"
+     }
+    },
+    {
+     "name": "read_file",
+     "args": {
+      "path": "sales/2026-11.csv"
+     }
+    },
+    {
+     "name": "create_invoice",
+     "args": {
+      "_raw": "{\"customer\":\"Jan de Vries\",\"items\":[{\"description\":\"Batavus Finez E-go\",\"qty\":1,\"unit_price\":700},{\"description\":\"Bike lock\",\"qty\":2,\"unit_price\":35}}"
+     }
+    },
+    {
+     "name": "create_invoice",
+     "args": {
+      "_raw": "{\"customer\":\"Jan de Vries\",\"items\":[{\"description\":\"Batavus Finez E-go\",\"qty\":1,\"unit_price\":700},{\"description\":\"Bike lock\",\"qty\":2,\"unit_price\":35}}"
+     }
+    },
+    {
+     "name": "create_invoice",
+     "args": {
+      "_raw": "{\"customer\":\"Jan de Vries\",\"items\":[{\"description\":\"Batavus Finez E-go\",\"qty\":1,\"unit_price\":700},{\"description\":\"Bike lock\",\"qty\":2,\"unit_price\":35}}"
+     }
+    },
+    {
+     "name": "create_invoice",
+     "args": {
+      "_raw": "{\"customer\":\"Jan de Vries\",\"items\":[{\"description\":\"Batavus Finez E-go\",\"qty\":1,\"unit_price\":700},{\"description\":\"Bike lock\",\"qty\":2,\"unit_price\":35}}"
+     }
+    }
+   ],
+   "answer": "",
+   "bad_json": 4,
+   "seconds": 7.6,
+   "tokens": 1421
+  },
+  "t10_status_trap": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Sparta",
+      "status": "any"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "S-2020"
+     }
+    }
+   ],
+   "answer": "No — the Sparta M7b (2020, 500 Wh, 80% battery health, ~12,500 km) is marked **sold** at €1,100. There are no other Sparta listings available right now.",
+   "bad_json": 0,
+   "seconds": 1.6,
+   "tokens": 251
+  }
+ },
+ "code": {
+  "c01_parse_price": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import re\n\ndef parse_price(s: str) -> float | None:\n    if not isinstance(s, str):\n        return None\n    text = s.strip()\n    if not text:\n        return None\n\n    lower = text.lower()\n    if lower.startswith('gratis'):\n        return 0.0\n    if lower.startswith('bieden'):\n        return None\n\n    # Strip currency symbol/code and whitespace\n    text = text.replace('€', '')\n    text = re.sub(r'eur', '', text, flags=re.IGNORECASE)\n    text = re.sub(r'\\s+', '', text)\n\n    # Dutch ',-' means no cents\n    text = text.replace(',-', '')\n    # Dutch thousands separator '.'\n    text = text.replace('.', '')\n    # Dutch decimal separator ','\n    text = text.replace(',', '.')\n\n    if not text:\n        return None\n    try:\n        return float(text)\n    except ValueError:\n        return None\n",
+     "raw": "```python\nimport re\n\ndef parse_price(s: str) -> float | None:\n    if not isinstance(s, str):\n        return None\n    text = s.strip()\n    if not text:\n        return None\n\n    lower = text.lower()\n    if lower.startswith('gratis'):\n        return 0.0\n    if lower.startswith('bieden'):\n        return None\n\n    # Strip currency symbol/code and whitespace\n    text = text.replace('€', '')\n    text = re.sub(r'eur', '', text, flags=re.IGNORECASE)\n    text = re.sub(r'\\s+', '', text)\n\n    # Dutch ',-' means no cents\n    text = text.replace(',-', '')\n    # Dutch thousands separator '.'\n    text = text.replace('.', '')\n    # Dutch decimal separator ','\n    text = text.replace(',', '.')\n\n    if not text:\n        return None\n    try:\n        return float(text)\n    except ValueError:\n        return None\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 5371
+    }
+   ],
+   "seconds": 14.6,
+   "tokens": 2201,
+   "pass1": true,
+   "pass2": true
+  },
+  "c02_postcode": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import re\n\n_POSTCODE_RE = re.compile(r'^[1-9][0-9]{3}(?: )?[A-Za-z]{2}$')\n_INVALID_LETTERS = {'SA', 'SD', 'SS'}\n\ndef is_valid_postcode(s: str) -> bool:\n    if not isinstance(s, str):\n        return False\n    if not _POSTCODE_RE.fullmatch(s):\n        return False\n    return s[-2:].upper() not in _INVALID_LETTERS\n",
+     "raw": "```python\nimport re\n\n_POSTCODE_RE = re.compile(r'^[1-9][0-9]{3}(?: )?[A-Za-z]{2}$')\n_INVALID_LETTERS = {'SA', 'SD', 'SS'}\n\ndef is_valid_postcode(s: str) -> bool:\n    if not isinstance(s, str):\n        return False\n    if not _POSTCODE_RE.fullmatch(s):\n        return False\n    return s[-2:].upper() not in _INVALID_LETTERS\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 2445
+    }
+   ],
+   "seconds": 4.5,
+   "tokens": 873,
+   "pass1": true,
+   "pass2": true
+  },
+  "c03_next_slot": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "from datetime import datetime, timedelta, time\n\n\ndef next_pickup_slot(now: datetime) -> datetime:\n    for offset in range(0, 8):\n        day = now.date() + timedelta(days=offset)\n        weekday = day.weekday()\n\n        if weekday == 6:  # Sunday\n            continue\n        if weekday == 5:  # Saturday\n            start_time = time(10, 0)\n            end_time = time(16, 0)\n        else:  # Monday-Friday\n            start_time = time(18, 0)\n            end_time = time(21, 0)\n\n        current = datetime.combine(day, start_time)\n        end = datetime.combine(day, end_time)\n        while current < end:\n            if current >= now:\n                return current\n            current += timedelta(minutes=30)\n\n    raise RuntimeError(\"No pickup slot found\")\n",
+     "raw": "```python\nfrom datetime import datetime, timedelta, time\n\n\ndef next_pickup_slot(now: datetime) -> datetime:\n    for offset in range(0, 8):\n        day = now.date() + timedelta(days=offset)\n        weekday = day.weekday()\n\n        if weekday == 6:  # Sunday\n            continue\n        if weekday == 5:  # Saturday\n            start_time = time(10, 0)\n            end_time = time(16, 0)\n        else:  # Monday-Friday\n            start_time = time(18, 0)\n            end_time = time(21, 0)\n\n        current = datetime.combine(day, start_time)\n        end = datetime.combine(day, end_time)\n        while current < end:\n            if current >= now:\n                return current\n            current += timedelta(minutes=30)\n\n    raise RuntimeError(\"No pickup slot found\")\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 4223
+    }
+   ],
+   "seconds": 7.4,
+   "tokens": 1469,
+   "pass1": true,
+   "pass2": true
+  },
+  "c04_dedupe": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "def dedupe(listings: list[dict]) -> list[dict]:\n    best = {}\n    for i, item in enumerate(listings):\n        key = (' '.join(item['title'].split()).lower(), item['price'])\n        cur = best.get(key)\n        if cur is None:\n            best[key] = (item['date'], i, item)\n        elif item['date'] < cur[0]:\n            best[key] = (item['date'], i, item)\n    selected = sorted(best.values(), key=lambda t: t[1])\n    return [item for _, _, item in selected]\n",
+     "raw": "```python\ndef dedupe(listings: list[dict]) -> list[dict]:\n    best = {}\n    for i, item in enumerate(listings):\n        key = (' '.join(item['title'].split()).lower(), item['price'])\n        cur = best.get(key)\n        if cur is None:\n            best[key] = (item['date'], i, item)\n        elif item['date'] < cur[0]:\n            best[key] = (item['date'], i, item)\n    selected = sorted(best.values(), key=lambda t: t[1])\n    return [item for _, _, item in selected]\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 3155
+    }
+   ],
+   "seconds": 5.0,
+   "tokens": 1020,
+   "pass1": true,
+   "pass2": true
+  },
+  "c05_fix_bug": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "def add_tag(tag, tags=None):\n    if tags is None:\n        tags = []\n    new_tags = list(tags)\n    if tag not in new_tags:\n        new_tags.append(tag)\n    return sorted(new_tags)\n",
+     "raw": "```python\ndef add_tag(tag, tags=None):\n    if tags is None:\n        tags = []\n    new_tags = list(tags)\n    if tag not in new_tags:\n        new_tags.append(tag)\n    return sorted(new_tags)\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 7047
+    }
+   ],
+   "seconds": 10.1,
+   "tokens": 2016,
+   "pass1": true,
+   "pass2": true
+  },
+  "c06_csv_totals": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import csv\nimport io\n\n\ndef totals_by_payment(csv_text: str) -> dict[str, int]:\n    totals: dict[str, int] = {}\n    if not csv_text or not csv_text.strip():\n        return totals\n\n    reader = csv.DictReader(io.StringIO(csv_text.lstrip(\"\\ufeff\")))\n    for row in reader:\n        payment = (row.get(\"payment\") or \"\").strip().lower()\n        if not payment:\n            continue\n\n        price_raw = (row.get(\"price\") or \"\").strip().strip('\"').replace(\",\", \"\").strip()\n        amount = int(price_raw)\n        totals[payment] = totals.get(payment, 0) + amount\n\n    return totals\n",
+     "raw": "```python\nimport csv\nimport io\n\n\ndef totals_by_payment(csv_text: str) -> dict[str, int]:\n    totals: dict[str, int] = {}\n    if not csv_text or not csv_text.strip():\n        return totals\n\n    reader = csv.DictReader(io.StringIO(csv_text.lstrip(\"\\ufeff\")))\n    for row in reader:\n        payment = (row.get(\"payment\") or \"\").strip().lower()\n        if not payment:\n            continue\n\n        price_raw = (row.get(\"price\") or \"\").strip().strip('\"').replace(\",\", \"\").strip()\n        amount = int(price_raw)\n        totals[payment] = totals.get(payment, 0) + amount\n\n    return totals\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 7705
+    }
+   ],
+   "seconds": 12.6,
+   "tokens": 2381,
+   "pass1": true,
+   "pass2": true
+  },
+  "c07_retry": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import time\n\ndef retry(fn, attempts=3, exceptions=(Exception,), sleep=time.sleep, base_delay=1.0):\n    for i in range(attempts):\n        try:\n            return fn()\n        except exceptions:\n            if i == attempts - 1:\n                raise\n            sleep(base_delay * (2 ** i))\n",
+     "raw": "```python\nimport time\n\ndef retry(fn, attempts=3, exceptions=(Exception,), sleep=time.sleep, base_delay=1.0):\n    for i in range(attempts):\n        try:\n            return fn()\n        except exceptions:\n            if i == attempts - 1:\n                raise\n            sleep(base_delay * (2 ** i))\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 3208
+    }
+   ],
+   "seconds": 4.7,
+   "tokens": 958,
+   "pass1": true,
+   "pass2": true
+  },
+  "c08_extract_json": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import json\n\ndef extract_json(text: str):\n    if not isinstance(text, str):\n        return None\n    decoder = json.JSONDecoder()\n    for i, ch in enumerate(text):\n        if ch != '{':\n            continue\n        try:\n            obj, _ = decoder.raw_decode(text, i)\n        except ValueError:\n            continue\n        if isinstance(obj, dict):\n            return obj\n    return None\n",
+     "raw": "```python\nimport json\n\ndef extract_json(text: str):\n    if not isinstance(text, str):\n        return None\n    decoder = json.JSONDecoder()\n    for i, ch in enumerate(text):\n        if ch != '{':\n            continue\n        try:\n            obj, _ = decoder.raw_decode(text, i)\n        except ValueError:\n            continue\n        if isinstance(obj, dict):\n            return obj\n    return None\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 13277
+    }
+   ],
+   "seconds": 20.7,
+   "tokens": 3877,
+   "pass1": true,
+   "pass2": true
+  }
+ }
+}

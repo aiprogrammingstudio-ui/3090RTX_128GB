@@ -61,8 +61,18 @@ and agent tests used the same client and settings for all three.
 | q27 | 53.9 tok/s at 250 W; 63.5–65.6 at 300 W | – | llama.cpp on our own code and prose prompts (MTP acceptance ~69%) |
 | Strata | 55.9 chat / 67.9 agent | – | Strata's live tok/s on real chat and coding-agent sessions |
 
-- DSpark speeds up one request by about 30%. With six requests the GPU is already at its 250 W cap, so drafting
-  costs about 5%.
+- DSpark speeds up one request by about 30% on this free prose. With six requests the GPU is already at its 250 W
+  cap, so drafting costs about 5%.
+- On tool calls and code DSpark pays much more. The same agent test (below), run twice with DSpark on and twice with
+  `SPEC=off`, gave the same scores but:
+
+  | Inkling, 250 W | Tool tasks: tok/s, time | Coding tasks: tok/s, time |
+  |---|---|---|
+  | DSpark on | 138–176 tok/s, 23–28 s | **186–203 tok/s**, 65–80 s |
+  | DSpark off | 92–95 tok/s, 36–49 s | **106 tok/s**, 153–190 s |
+
+  That's ~1.8x on code and ~1.6x on tool tasks (completion tokens ÷ wall time, including prefill and tool round
+  trips). Raw results: `tests/agent_test/results_ds_*.json`.
 - HyperInkling's own README reports 611–686 tok/s for 6 streams. Those runs used more power, gpu-unlock and a
   different way of measuring; see [Inkling: exact configuration](#inkling-exact-configuration-and-the-600-toks-reports).
 - Startup time: Inkling ~70 s (~4 min on the first start, while it compiles kernels); Strata ~2 min.
