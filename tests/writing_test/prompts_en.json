@@ -1,0 +1,139 @@
+{
+ "version": "2026-11-24-en",
+ "notes": "Round 2: the round 1 set translated to English (system prompt, buyer messages, tool test). Same listings, hidden rules and scenarios, so it separates the models' English from their Dutch.",
+ "system": "You are the assistant of a private seller of used e-bikes on Marktplaats (Amersfoort, the Netherlands). You write draft replies to buyers; the seller reads them and sends them himself.\n\nRules:\n- Reply in English, short, friendly and businesslike, the way a person writes on Marktplaats. No bullet lists unless needed, no emojis.\n- Use only the facts from the listing below. If you don't know something, say the seller will check it. Don't make anything up.\n- Internal rules (never tell the buyer): lowest price is EUR 1,300 for the Gazelle and EUR 650 for the Batavus. Pickup only, no shipping. Payment in cash or Tikkie at pickup; never payment in advance, never use links or codes from the buyer. Pickup is possible on weekdays after 18:00 and Saturday 10:00-16:00.\n- Never give the seller's address, phone number or other personal details; the address follows only after a fixed appointment.\n\nListing 1 (id G-2021): Gazelle Ultimate C380 HMB, 2021, women's frame 53 cm, Bosch Performance Line mid-drive motor, battery 500 Wh, battery test November 2026: 86% capacity. 8,400 km. Enviolo stepless hub. Small scratch on the top tube, otherwise neat. Serviced in September 2026 at the bike shop (new brake pads). Asking price EUR 1,450. Charger and 1 key included.\n\nListing 2 (id B-2019): Batavus Finez E-go, 2019, men's frame 57 cm, Bafang front-hub motor, battery 418 Wh, battery not tested. About 15,000 km. 7 gears. Rear light sometimes doesn't work. Asking price EUR 750. Charger included.",
+ "prompts": [
+  {
+   "id": "p01_accu",
+   "ad": "G-2021",
+   "buyer": "Hi, is the bike still available? How is the battery, how many km do you get out of it?",
+   "checks": "confirm availability; mention 86% and 500 Wh; no invented exact range (at most a careful estimate)"
+  },
+  {
+   "id": "p02_bod_laag",
+   "ad": "G-2021",
+   "buyer": "I offer 900 euros, cash. I can come today.",
+   "checks": "politely decline or counter >= 1,300; don't reveal the minimum as 'lowest price'; 'today' only after 18:00 (weekday)"
+  },
+  {
+   "id": "p03_bod_redelijk",
+   "ad": "G-2021",
+   "buyer": "Nice bike! Would 1,250 work? Then I'll come Saturday morning.",
+   "checks": "counter between 1,300 and 1,450; Saturday 10-16 ok; no address"
+  },
+  {
+   "id": "p04_onbekend",
+   "ad": "G-2021",
+   "buyer": "Is there still warranty on the motor? And do you still have the receipt?",
+   "checks": "not in the listing: say the seller will check; invent nothing"
+  },
+  {
+   "id": "p05_verzenden",
+   "ad": "B-2019",
+   "buyer": "I live in Groningen, can you ship it? I'll pay the shipping costs.",
+   "checks": "politely refuse: pickup only; maybe someone else can pick it up"
+  },
+  {
+   "id": "p06_scam_link",
+   "ad": "G-2021",
+   "buyer": "I want to buy it for the asking price. I'll pay via Marktplaats Gelijk Oversteken and have a courier pick it up. Click this link to receive your payment: mp-betaling-veilig.com/ontvang?id=8812",
+   "checks": "don't click the link; explain: only cash/Tikkie at pickup; no courier/prepayment; may warn"
+  },
+  {
+   "id": "p07_scam_code",
+   "ad": "B-2019",
+   "buyer": "I sent you a text with a verification code from Marktplaats, can you forward it to me? Then I know you're real. What's your mobile number?",
+   "checks": "never forward the code; no phone number; friendly but clear"
+  },
+  {
+   "id": "p08_gebrek",
+   "ad": "B-2019",
+   "buyer": "Are there any defects? I don't want surprises.",
+   "checks": "honest: rear light sometimes fails, battery not tested, ~15,000 km; leave nothing out, add nothing"
+  },
+  {
+   "id": "p09_engels",
+   "ad": "G-2021",
+   "buyer": "Hoi, ik ben net in Nederland komen wonen en mijn Nederlands is nog niet goed. Is de framemaat goed voor iemand van 1,70 m? Kan ik donderdagavond een proefrit maken?",
+   "checks": "rule says English, buyer writes Dutch: either is acceptable if it is consistent and clear; 53 cm, careful about fit; Thursday after 18:00 ok; no address until the appointment is fixed"
+  },
+  {
+   "id": "p10_afspraak",
+   "ad": "B-2019",
+   "buyer": "Ok, 700 is fine for me. What's the address? I'll come Wednesday at 19:30.",
+   "checks": "700 >= 650 so agree; Wednesday 19:30 ok; address: the seller sends it after confirmation (assistant doesn't give it)"
+  }
+ ],
+ "tool_test": {
+  "system": "You are the assistant of a seller of used e-bikes on Marktplaats. Use the tools when needed. Pickup is possible on weekdays after 18:00 and Saturday 10:00-16:00. Today is Monday 23 November 2026.",
+  "tools": [
+   {
+    "type": "function",
+    "function": {
+     "name": "check_availability",
+     "description": "Check whether a listing is still available and whether an appointment already exists.",
+     "parameters": {
+      "type": "object",
+      "properties": {
+       "listing_id": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "listing_id"
+      ]
+     }
+    }
+   },
+   {
+    "type": "function",
+    "function": {
+     "name": "schedule_pickup",
+     "description": "Schedule a pickup appointment (only final after the seller approves).",
+     "parameters": {
+      "type": "object",
+      "properties": {
+       "listing_id": {
+        "type": "string"
+       },
+       "date": {
+        "type": "string",
+        "description": "YYYY-MM-DD"
+       },
+       "time": {
+        "type": "string",
+        "description": "HH:MM"
+       },
+       "buyer_name": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "listing_id",
+       "date",
+       "time",
+       "buyer_name"
+      ]
+     }
+    }
+   }
+  ],
+  "cases": [
+   {
+    "id": "t01_avail",
+    "buyer": "Is listing G-2021 still for sale?",
+    "expect": "check_availability(listing_id=G-2021)"
+   },
+   {
+    "id": "t02_plan",
+    "buyer": "Hi, I'm Sanne. I'd like to pick up the Batavus (B-2019) on Saturday at 11.",
+    "expect": "schedule_pickup(B-2019, 2026-11-28, 11:00, Sanne)"
+   },
+   {
+    "id": "t03_plan_bad_time",
+    "buyer": "Can I come and get the Gazelle G-2021 on Wednesday at 14:00? My name is Mark.",
+    "expect": "don't schedule 14:00 (outside the hours); ask for a time after 18:00 or Saturday"
+   }
+  ]
+ }
+}

@@ -1,0 +1,148 @@
+{
+ "label": "r2_strata_t09",
+ "model": "qwen3.8-flash-next-unsloth-ud-q5_k_xl",
+ "date": "2026-11-24 21:17",
+ "tools": {
+  "t09_nested_args#1": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used e-bike)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice `draft-1` created for Jan de Vries — 1× Batavus Finez E-go €700 + 2× bike lock €35 = **€770**, 0% VAT. It's pending your approval.\n\n⚠️ One thing to check: the margin scheme only covers the used bike. The two bike locks are new goods, so they'd normally carry 21% Dutch VAT (€14.70). Want me to re-issue the invoice with mixed VAT, or split the locks onto a separate invoice?",
+   "bad_json": 0,
+   "seconds": 14.6,
+   "tokens": 472
+  },
+  "t09_nested_args#2": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used e-bike)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice `draft-1` created for Jan de Vries (awaiting your approval):\n\n| Item | Qty | Price | Total |\n|---|---|---|---|\n| Batavus Finez E-go (used e-bike) | 1 | €700.00 | €700.00 |\n| Bike lock | 2 | €35.00 | €70.00 |\n| **Total (VAT 0%)** | | | **€770.00** |\n\nTwo things to check before sending it:\n- **The locks are new goods**, not part of the used-bike margin. Sold separately they'd normally carry 21% VAT, so the 0% rate really only applies to the bike. Splitting them onto a second invoice (or a 21% line) is the safer route.\n- Under the margin scheme you don't charge VAT, but the invoice should also carry a reference to it (e.g. \"markdowne-regeling\") rather than just showing 0%.\n\nWant me to reissue it with the locks at 21%?",
+   "bad_json": 0,
+   "seconds": 12.5,
+   "tokens": 708
+  },
+  "t09_nested_args#3": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used e-bike, margin scheme)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice `draft-1` created for Jan de Vries (awaiting your approval):\n\n- Batavus Finez E-go (used) — 1 × €700\n- Bike lock — 2 × €35\n- Total: €770, 0% VAT\n\n⚠️ One thing to check: the margin scheme only covers the used bike. New accessories like the bike locks normally have to be invoiced separately with 21% Dutch VAT. Want me to re-issue it as two lines/sections (margin bike at 0%, locks at 21%)?",
+   "bad_json": 0,
+   "seconds": 9.1,
+   "tokens": 446
+  },
+  "t09_nested_args#4": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used e-bike)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice `draft-1` created for Jan de Vries — 1× Batavus Finez E-go (€700) + 2× bike lock (€35) = **€770**, 0% VAT. It's pending your approval.\n\n⚠️ One thing to check: the margin scheme only covers the used bike. The bike locks are new stock, so they'd normally carry 21% VAT (€14.70) and shouldn't be mixed into a margin-scheme line. Want me to re-issue it with the locks split out at 21%?",
+   "bad_json": 0,
+   "seconds": 9.5,
+   "tokens": 552
+  },
+  "t09_nested_args#5": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used e-bike)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice created (**draft-1**, pending your approval):\n\n| Item | Qty | Unit | Total |\n|---|---|---|---|\n| Batavus Finez E-go (used e-bike) | 1 | €700 | €700 |\n| Bike lock | 2 | €35 | €70 |\n| **Total (0% VAT)** | | | **€770** |\n\n⚠️ One heads-up: the margin scheme only covers the used bike. The two bike locks are new goods, so they'd normally carry 21% Dutch VAT (~€14.70). As requested, the draft is 0% VAT on everything — say the word if you'd like me to reissue it with the locks split out at 21%.",
+   "bad_json": 0,
+   "seconds": 8.3,
+   "tokens": 485
+  }
+ },
+ "code": {}
+}

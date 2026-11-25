@@ -1,0 +1,375 @@
+{
+ "label": "inkling",
+ "model": "inkling-2-mini",
+ "date": "2026-11-24 21:12",
+ "tools": {
+  "t01_simple": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2021"
+     }
+    }
+   ],
+   "answer": "Listing G-2021 (Gazelle Ultimate C380 HMB) has a battery health of 86%.",
+   "bad_json": 0,
+   "seconds": 2.1,
+   "tokens": 138
+  },
+  "t02_enum_filter": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "max_price": 1500,
+      "status": "available"
+     }
+    }
+   ],
+   "answer": "- G-2021 — €1,450\n- G-2018 — €980",
+   "bad_json": 0,
+   "seconds": 1.6,
+   "tokens": 131
+  },
+  "t03_chain": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "available"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2018"
+     }
+    }
+   ],
+   "answer": "The cheapest available Gazelle is the **Gazelle Arroyo C7** (G-2018) at **€980**, and it has done **21,000 km**.",
+   "bad_json": 0,
+   "seconds": 2.3,
+   "tokens": 225
+  },
+  "t04_parallel": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_weather",
+     "args": {
+      "city": "Amersfoort",
+      "date": "2026-11-24"
+     }
+    },
+    {
+     "name": "get_weather",
+     "args": {
+      "city": "Utrecht",
+      "date": "2026-11-24"
+     }
+    }
+   ],
+   "answer": "Utrecht will be drier tomorrow — about 0.5 mm of rain versus 4.5 mm in Amersfoort.",
+   "bad_json": 0,
+   "seconds": 1.3,
+   "tokens": 232
+  },
+  "t05_error_recovery": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G2018"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "status": "any"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2018"
+     }
+    }
+   ],
+   "answer": "The listing you meant is **G-2018** (the id format uses a hyphen). Details:\n\n- **Title:** Gazelle Arroyo C7\n- **Brand:** Gazelle\n- **Year:** 2018\n- **Price:** €980\n- **Battery:** 400 Wh, 71% health\n- **Mileage:** 21,000 km\n- **Status:** available\n\nNote the battery health is 71% — worth mentioning to a buyer.",
+   "bad_json": 0,
+   "seconds": 2.0,
+   "tokens": 341
+  },
+  "t06_no_tool": {
+   "ok": true,
+   "calls": [],
+   "answer": "Cold temperatures slow the chemical reactions inside lithium-ion batteries, so they deliver less usable energy and feel weaker until they warm up.",
+   "bad_json": 0,
+   "seconds": 0.6,
+   "tokens": 70
+  },
+  "t07_files_sum": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "list_files",
+     "args": {
+      "prefix": "sales"
+     }
+    },
+    {
+     "name": "read_file",
+     "args": {
+      "path": "sales/2026-10.csv"
+     }
+    }
+   ],
+   "answer": "October 2026 sales revenue was **€2,680** (640 + 1,150 + 890).",
+   "bad_json": 0,
+   "seconds": 1.8,
+   "tokens": 261
+  },
+  "t08_dates": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "B-2019"
+     }
+    },
+    {
+     "name": "create_event",
+     "args": {
+      "date": "2026-11-28",
+      "end": "12:00",
+      "start": "11:00",
+      "title": "Pickup B-2019 (Batavus Finez E-go) - Sanne"
+     }
+    }
+   ],
+   "answer": "Done — draft calendar event created:\n\n- **What:** Pickup B-2019 (Batavus Finez E-go) — Sanne\n- **When:** Saturday 28 November 2026, 11:00–12:00\n\nNote: it's a draft (id draft-1) and needs your approval before it's confirmed. The listing is currently \"available\" (price €750, 15,000 km).",
+   "bad_json": 0,
+   "seconds": 3.0,
+   "tokens": 550
+  },
+  "t09_nested_args": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "list_files",
+     "args": {}
+    },
+    {
+     "name": "read_file",
+     "args": {
+      "path": "notes.txt"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Batavus",
+      "status": "available"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "B-2019"
+     }
+    },
+    {
+     "name": "create_invoice",
+     "args": {}
+    },
+    {
+     "name": "create_invoice",
+     "args": {}
+    },
+    {
+     "name": "create_invoice",
+     "args": {}
+    },
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "",
+   "bad_json": 3,
+   "seconds": 7.4,
+   "tokens": 1436
+  },
+  "t10_status_trap": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Sparta"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Sparta",
+      "status": "any"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "S-2020"
+     }
+    }
+   ],
+   "answer": "No — the Sparta M7b (2020, €1,100, 12,500 km, 80% battery health) is already sold.",
+   "bad_json": 0,
+   "seconds": 1.9,
+   "tokens": 274
+  }
+ },
+ "code": {
+  "c01_parse_price": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "def parse_price(s: str) -> float | None:\n    if not isinstance(s, str):\n        return None\n    text = s.strip()\n    if not text:\n        return None\n\n    normalized = ''.join(ch for ch in text.lower() if ch.isalnum())\n    if normalized == 'gratis':\n        return 0.0\n    if normalized == 'bieden':\n        return None\n\n    cleaned = text.replace('€', '').replace('−', '-')\n    cleaned = ''.join(cleaned.split())\n    for token in ('EUR', 'eur', 'Euro', 'euro'):\n        cleaned = cleaned.replace(token, '')\n    cleaned = ''.join(cleaned.split())\n    if not cleaned:\n        return None\n\n    # Dutch format: '.' thousands separator, ',' decimal separator,\n    # ',-' means zero decimal places\n    cleaned = cleaned.replace('.', '')\n    if cleaned.endswith(',-'):\n        cleaned = cleaned[:-2]\n    cleaned = cleaned.replace(',', '.')\n\n    try:\n        return float(cleaned)\n    except ValueError:\n        return None\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 18.6,
+   "tokens": 3946,
+   "pass1": true,
+   "pass2": true
+  },
+  "c02_postcode": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import re\n\n_POSTCODE_RE = re.compile(r'^([1-9][0-9]{3})(?: )?([A-Za-z]{2})$')\n\ndef is_valid_postcode(s: str) -> bool:\n    if not isinstance(s, str):\n        return False\n    match = _POSTCODE_RE.match(s)\n    if match is None:\n        return False\n    return match.group(2).upper() not in {'SA', 'SD', 'SS'}\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 3.8,
+   "tokens": 757,
+   "pass1": true,
+   "pass2": true
+  },
+  "c03_next_slot": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import datetime\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    day = now.date()\n    for _ in range(8):\n        weekday = day.weekday()  # Monday=0 ... Sunday=6\n        if weekday < 5:\n            start_time, end_time = datetime.time(18, 0), datetime.time(21, 0)\n        elif weekday == 5:\n            start_time, end_time = datetime.time(10, 0), datetime.time(16, 0)\n        else:\n            day += datetime.timedelta(days=1)\n            continue\n\n        window_start = datetime.datetime.combine(day, start_time, tzinfo=now.tzinfo)\n        window_end = datetime.datetime.combine(day, end_time, tzinfo=now.tzinfo)\n\n        slot = window_start\n        while slot < window_end:\n            if slot >= now:\n                return slot.replace(second=0, microsecond=0)\n            slot += datetime.timedelta(minutes=30)\n\n        day += datetime.timedelta(days=1)\n\n    raise RuntimeError(\"No pickup slot found\")\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 6.6,
+   "tokens": 1467,
+   "pass1": true,
+   "pass2": true
+  },
+  "c04_dedupe": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "def dedupe(listings: list[dict]) -> list[dict]:\n    def norm_title(title):\n        return ' '.join(str(title).split()).lower()\n\n    best = {}  # key -> (date, index, item)\n    for i, item in enumerate(listings):\n        key = (norm_title(item['title']), item['price'])\n        d = item['date']\n        if key not in best:\n            best[key] = (d, i, item)\n        else:\n            bd, _, _ = best[key]\n            if d < bd:\n                best[key] = (d, i, item)\n\n    kept = sorted(best.values(), key=lambda x: x[1])\n    return [item for _, _, item in kept]\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 5.0,
+   "tokens": 1046,
+   "pass1": true,
+   "pass2": true
+  },
+  "c05_fix_bug": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "def add_tag(tag, tags=None):\n    if tags is None:\n        tags = []\n    new_tags = list(tags)\n    if tag not in new_tags:\n        new_tags.append(tag)\n    return sorted(new_tags)\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 5.5,
+   "tokens": 1073,
+   "pass1": true,
+   "pass2": true
+  },
+  "c06_csv_totals": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import csv\nfrom io import StringIO\n\ndef totals_by_payment(csv_text: str) -> dict[str, int]:\n    rows = list(csv.reader(StringIO(csv_text)))\n    if not rows:\n        return {}\n\n    header = [cell.strip().lstrip(\"\\ufeff\").lower() for cell in rows[0]]\n    try:\n        price_idx = header.index(\"price\")\n        payment_idx = header.index(\"payment\")\n    except ValueError:\n        return {}\n\n    totals: dict[str, int] = {}\n    for row in rows[1:]:\n        if not row:\n            continue\n        if len(row) <= max(price_idx, payment_idx):\n            continue\n\n        raw_price = row[price_idx].strip().replace(\",\", \"\").replace(\"$\", \"\").strip()\n        payment = row[payment_idx].strip().lower()\n        if not payment or not raw_price:\n            continue\n\n        try:\n            price = int(raw_price)\n        except ValueError:\n            try:\n                price = int(float(raw_price))\n            except ValueError:\n                continue\n\n        totals[payment] = totals.get(payment, 0) + price\n\n    return totals\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 9.5,
+   "tokens": 1999,
+   "pass1": true,
+   "pass2": true
+  },
+  "c07_retry": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import time\n\ndef retry(fn, attempts=3, exceptions=(Exception,), sleep=time.sleep, base_delay=1.0):\n    for i in range(attempts):\n        try:\n            return fn()\n        except exceptions:\n            if i == attempts - 1:\n                raise\n            sleep(base_delay * (2 ** i))\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 5.6,
+   "tokens": 1140,
+   "pass1": true,
+   "pass2": true
+  },
+  "c08_extract_json": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "import json\n\n\ndef extract_json(text: str):\n    \"\"\"Find the first valid JSON object in `text` and return it as a dict.\n\n    Handles ",
+     "test_output": "  File \"/tmp/tmp1o_byj8o/t.py\", line 5\n    \"\"\"Find the first valid JSON object in `text` and return it as a dict.\n    ^\nSyntaxError: unterminated triple-quoted string literal (detected at line 14)\n",
+     "finish": "stop"
+    },
+    {
+     "ok": true,
+     "code": "import json\n\n\ndef extract_json(text):\n    if not isinstance(text, str):\n        return None\n    decoder = json.JSONDecoder()\n    pos = 0\n    while True:\n        start = text.find('{', pos)\n        if start == -1:\n            return None\n        try:\n            obj, _end = decoder.raw_decode(text[start:])\n        except json.JSONDecodeError:\n            pos = start + 1\n            continue\n        if isinstance(obj, dict):\n            return obj\n        pos = start + 1\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 9.9,
+   "tokens": 1991,
+   "pass1": false,
+   "pass2": true
+  }
+ }
+}

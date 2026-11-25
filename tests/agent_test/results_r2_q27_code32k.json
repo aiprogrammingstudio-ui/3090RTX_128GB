@@ -1,0 +1,128 @@
+{
+ "label": "r2_q27_code32k",
+ "model": "qwen3.8-27b",
+ "date": "2026-11-24 21:24",
+ "tools": {},
+ "code": {
+  "c01_parse_price#1": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "",
+     "raw": "",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmpkrspjm1p/t.py\", line 3, in <module>\n    assert parse_price('€ 1.450,-') == 1450.0\n           ^^^^^^^^^^^\nNameError: name 'parse_price' is not defined\n",
+     "finish": "length",
+     "reasoning_chars": 63115
+    },
+    {
+     "ok": true,
+     "code": "import html\nimport re\n\n\ndef parse_price(s: str) -> float | None:\n    if not isinstance(s, str):\n        return None\n\n    s = html.unescape(s).strip()\n    if not s:\n        return None\n\n    lowered = s.lower()\n    if \"bied\" in lowered:\n        return None\n    if \"gratis\" in lowered:\n        return 0.0\n\n    # Remove whitespace and everything except digits, dots, and commas.\n    t = \"\".join(s.split())\n    t = re.sub(r\"[^0-9,.]\", \"\", t)\n    if not t:\n        return None\n\n    # Dutch prices often end with \",-\" meaning no cents.\n    while t.endswith(\",\"):\n        t = t[:-1]\n        if not t:\n            return None\n\n    if \",\" in t:\n        integer_part, decimal_part = t.split(\",\", 1)\n        if \",\" in decimal_part:\n            return None\n\n        integer_part = integer_part.replace(\".\", \"\")\n        decimal_part = decimal_part.replace(\".\", \"\")\n\n        if integer_part == \"\":\n            integer_part = \"0\"\n\n        if not integer_part.isdigit() or (decimal_part and not decimal_part.isdigit()):\n            return None\n\n        if decimal_part:\n            return float(f\"{integer_part}.{decimal_part}\")\n        return float(integer_part)\n\n    if \".\" in t:\n        # Standard Dutch thousands grouping: 1.250.500\n        if re.fullmatch(r\"\\d{1,3}(?:\\.\\d{3})+\", t):\n            t = t.replace(\".\", \"\")\n        # Fall back to treating a single dot as a decimal point.\n        elif re.fullmatch(r\"\\d+\\.\\d+\", t):\n            return float(t)\n        elif re.fullmatch(r\"\\.\\d+\", t):\n            return float(t)\n        elif re.fullmatch(r\"\\d+\\.\", t):\n            return float(t)\n        else:\n            t = t.replace(\".\", \"\")\n\n    if t.isdigit():\n        return float(t)\n\n    return None\n",
+     "raw": "```python\nimport html\nimport re\n\n\ndef parse_price(s: str) -> float | None:\n    if not isinstance(s, str):\n        return None\n\n    s = html.unescape(s).strip()\n    if not s:\n        return None\n\n    lowered = s.lower()\n    if \"bied\" in lowered:\n        return None\n    if \"gratis\" in lowered:\n        return 0.0\n\n    # Remove whitespace and everything except digits, dots, and commas.\n    t = \"\".join(s.split())\n    t = re.sub(r\"[^0-9,.]\", \"\", t)\n    if not t:\n        return None\n\n    # Dutch prices often end with \",-\" meaning no cents.\n    while t.endswith(\",\"):\n        t = t[:-1]\n        if not t:\n            return None\n\n    if \",\" in t:\n        integer_part, decimal_part = t.split(\",\", 1)\n        if \",\" in decimal_part:\n            return None\n\n        integer_part = integer_part.replace(\".\", \"\")\n        decimal_part = decimal_part.replace(\".\", \"\")\n\n        if integer_part == \"\":\n            integer_part = \"0\"\n\n        if not integer_part.isdigit() or (decimal_part and not decimal_part.isdigit()):\n            return None\n\n        if decimal_part:\n            return float(f\"{integer_part}.{decimal_part}\")\n        return float(integer_part)\n\n    if \".\" in t:\n        # Standard Dutch thousands grouping: 1.250.500\n        if re.fullmatch(r\"\\d{1,3}(?:\\.\\d{3})+\", t):\n            t = t.replace(\".\", \"\")\n        # Fall back to treating a single dot as a decimal point.\n        elif re.fullmatch(r\"\\d+\\.\\d+\", t):\n            return float(t)\n        elif re.fullmatch(r\"\\.\\d+\", t):\n            return float(t)\n        elif re.fullmatch(r\"\\d+\\.\", t):\n            return float(t)\n        else:\n            t = t.replace(\".\", \"\")\n\n    if t.isdigit():\n        return float(t)\n\n    return None\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 75073
+    }
+   ],
+   "seconds": 1023.1,
+   "tokens": 57873,
+   "pass1": false,
+   "pass2": true
+  },
+  "c01_parse_price#2": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "",
+     "raw": "",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmpclmgvdif/t.py\", line 3, in <module>\n    assert parse_price('€ 1.450,-') == 1450.0\n           ^^^^^^^^^^^\nNameError: name 'parse_price' is not defined\n",
+     "finish": "length",
+     "reasoning_chars": 93633
+    },
+    {
+     "ok": true,
+     "code": "import re\n\n\ndef parse_price(s: str) -> float | None:\n    if not isinstance(s, str):\n        return None\n\n    text = s.strip()\n    if not text:\n        return None\n\n    lowered = text.lower()\n    if \"gratis\" in lowered:\n        return 0.0\n    if \"bieden\" in lowered:\n        return None\n\n    text = text.replace(\"\\u00a0\", \"\")\n    text = re.sub(r\"€|euro|eur|\\s\", \"\", text, flags=re.IGNORECASE)\n    text = re.sub(r\",-$\", \"\", text)\n    text = text.rstrip(\"-\")\n\n    if not text:\n        return None\n\n    sign = 1.0\n    if text[0] in \"+-\":\n        if text[0] == \"-\":\n            sign = -1.0\n        text = text[1:]\n        if not text:\n            return None\n\n    if \",\" in text:\n        if text.count(\",\") > 1:\n            return None\n\n        integer_part, fraction_part = text.split(\",\")\n\n        if integer_part and not re.fullmatch(r\"\\d{1,3}(?:\\.\\d{3})*|\\d+\", integer_part):\n            return None\n        if not re.fullmatch(r\"\\d*\", fraction_part):\n            return None\n        if not integer_part and not fraction_part:\n            return None\n\n        integer_part = integer_part.replace(\".\", \"\") or \"0\"\n\n        if fraction_part:\n            return sign * float(f\"{integer_part}.{fraction_part}\")\n        return sign * float(integer_part)\n\n    if \".\" in text:\n        if re.fullmatch(r\"\\d{1,3}(?:\\.\\d{3})+\", text):\n            text = text.replace(\".\", \"\")\n        elif re.fullmatch(r\"\\d+\\.\\d+\", text):\n            return sign * float(text)\n        elif re.fullmatch(r\"\\d+\\.\", text):\n            text = text[:-1]\n        else:\n            return None\n\n    if not re.fullmatch(r\"\\d+\", text):\n        return None\n\n    return sign * float(text)\n",
+     "raw": "```python\nimport re\n\n\ndef parse_price(s: str) -> float | None:\n    if not isinstance(s, str):\n        return None\n\n    text = s.strip()\n    if not text:\n        return None\n\n    lowered = text.lower()\n    if \"gratis\" in lowered:\n        return 0.0\n    if \"bieden\" in lowered:\n        return None\n\n    text = text.replace(\"\\u00a0\", \"\")\n    text = re.sub(r\"€|euro|eur|\\s\", \"\", text, flags=re.IGNORECASE)\n    text = re.sub(r\",-$\", \"\", text)\n    text = text.rstrip(\"-\")\n\n    if not text:\n        return None\n\n    sign = 1.0\n    if text[0] in \"+-\":\n        if text[0] == \"-\":\n            sign = -1.0\n        text = text[1:]\n        if not text:\n            return None\n\n    if \",\" in text:\n        if text.count(\",\") > 1:\n            return None\n\n        integer_part, fraction_part = text.split(\",\")\n\n        if integer_part and not re.fullmatch(r\"\\d{1,3}(?:\\.\\d{3})*|\\d+\", integer_part):\n            return None\n        if not re.fullmatch(r\"\\d*\", fraction_part):\n            return None\n        if not integer_part and not fraction_part:\n            return None\n\n        integer_part = integer_part.replace(\".\", \"\") or \"0\"\n\n        if fraction_part:\n            return sign * float(f\"{integer_part}.{fraction_part}\")\n        return sign * float(integer_part)\n\n    if \".\" in text:\n        if re.fullmatch(r\"\\d{1,3}(?:\\.\\d{3})+\", text):\n            text = text.replace(\".\", \"\")\n        elif re.fullmatch(r\"\\d+\\.\\d+\", text):\n            return sign * float(text)\n        elif re.fullmatch(r\"\\d+\\.\", text):\n            text = text[:-1]\n        else:\n            return None\n\n    if not re.fullmatch(r\"\\d+\", text):\n        return None\n\n    return sign * float(text)\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 78999
+    }
+   ],
+   "seconds": 1105.3,
+   "tokens": 58925,
+   "pass1": false,
+   "pass2": true
+  },
+  "c03_next_slot#1": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import datetime\n\n\ndef _round_up_to_30_minutes(dt: datetime.datetime) -> datetime.datetime:\n    total_minutes = dt.hour * 60 + dt.minute\n\n    if dt.second or dt.microsecond or total_minutes % 30 != 0:\n        total_minutes = (total_minutes // 30 + 1) * 30\n\n    day_offset = total_minutes // 1440\n    hour = (total_minutes % 1440) // 60\n    minute = total_minutes % 60\n\n    new_date = dt.date() + datetime.timedelta(days=day_offset)\n    return dt.replace(\n        year=new_date.year,\n        month=new_date.month,\n        day=new_date.day,\n        hour=hour,\n        minute=minute,\n        second=0,\n        microsecond=0,\n    )\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    candidate = _round_up_to_30_minutes(now)\n    day = now.date()\n\n    while True:\n        weekday = day.weekday()\n\n        if weekday != 6:\n            if weekday == 5:\n                start_hour, end_hour = 10, 16\n            else:\n                start_hour, end_hour = 18, 21\n\n            start = now.replace(\n                year=day.year,\n                month=day.month,\n                day=day.day,\n                hour=start_hour,\n                minute=0,\n                second=0,\n                microsecond=0,\n            )\n            end = now.replace(\n                year=day.year,\n                month=day.month,\n                day=day.day,\n                hour=end_hour,\n                minute=0,\n                second=0,\n                microsecond=0,\n            )\n\n            slot = candidate\n            if slot < start:\n                slot = start\n\n            if slot < end:\n                return slot\n\n        day += datetime.timedelta(days=1)\n",
+     "raw": "```python\nimport datetime\n\n\ndef _round_up_to_30_minutes(dt: datetime.datetime) -> datetime.datetime:\n    total_minutes = dt.hour * 60 + dt.minute\n\n    if dt.second or dt.microsecond or total_minutes % 30 != 0:\n        total_minutes = (total_minutes // 30 + 1) * 30\n\n    day_offset = total_minutes // 1440\n    hour = (total_minutes % 1440) // 60\n    minute = total_minutes % 60\n\n    new_date = dt.date() + datetime.timedelta(days=day_offset)\n    return dt.replace(\n        year=new_date.year,\n        month=new_date.month,\n        day=new_date.day,\n        hour=hour,\n        minute=minute,\n        second=0,\n        microsecond=0,\n    )\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    candidate = _round_up_to_30_minutes(now)\n    day = now.date()\n\n    while True:\n        weekday = day.weekday()\n\n        if weekday != 6:\n            if weekday == 5:\n                start_hour, end_hour = 10, 16\n            else:\n                start_hour, end_hour = 18, 21\n\n            start = now.replace(\n                year=day.year,\n                month=day.month,\n                day=day.day,\n                hour=start_hour,\n                minute=0,\n                second=0,\n                microsecond=0,\n            )\n            end = now.replace(\n                year=day.year,\n                month=day.month,\n                day=day.day,\n                hour=end_hour,\n                minute=0,\n                second=0,\n                microsecond=0,\n            )\n\n            slot = candidate\n            if slot < start:\n                slot = start\n\n            if slot < end:\n                return slot\n\n        day += datetime.timedelta(days=1)\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 38176
+    }
+   ],
+   "seconds": 222.9,
+   "tokens": 12113,
+   "pass1": true,
+   "pass2": true
+  },
+  "c03_next_slot#2": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "import datetime\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    candidate = now.replace(second=0, microsecond=0)\n    minute_offset = (30 - candidate.minute) % 30\n\n    if minute_offset:\n        candidate += datetime.timedelta(minutes=minute_offset)\n\n    if candidate < now:\n        candidate += datetime.timedelta(minutes=30)\n\n    tzinfo = now.tzinfo\n\n    for offset in range(8):\n        day = now.date() + datetime.timedelta(days=offset)\n        weekday = day.weekday()\n\n        if weekday == 6:\n            continue\n\n        if weekday == 5:\n            start_hour, end_hour = 10, 16\n        else:\n            start_hour, end_hour = 18, 21\n\n        first = datetime.combine(\n            day,\n            datetime.time(start_hour, 0),\n            tzinfo=tzinfo\n        )\n        last = datetime.combine(\n            day,\n            datetime.time(end_hour, 0),\n            tzinfo=tzinfo\n        ) - datetime.timedelta(minutes=30)\n\n        if offset == 0:\n            slot = candidate if candidate >= first else first\n        else:\n            slot = first\n\n        if slot <= last:\n            return slot\n\n    raise RuntimeError(\"No pickup slot found\")\n",
+     "raw": "```python\nimport datetime\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    candidate = now.replace(second=0, microsecond=0)\n    minute_offset = (30 - candidate.minute) % 30\n\n    if minute_offset:\n        candidate += datetime.timedelta(minutes=minute_offset)\n\n    if candidate < now:\n        candidate += datetime.timedelta(minutes=30)\n\n    tzinfo = now.tzinfo\n\n    for offset in range(8):\n        day = now.date() + datetime.timedelta(days=offset)\n        weekday = day.weekday()\n\n        if weekday == 6:\n            continue\n\n        if weekday == 5:\n            start_hour, end_hour = 10, 16\n        else:\n            start_hour, end_hour = 18, 21\n\n        first = datetime.combine(\n            day,\n            datetime.time(start_hour, 0),\n            tzinfo=tzinfo\n        )\n        last = datetime.combine(\n            day,\n            datetime.time(end_hour, 0),\n            tzinfo=tzinfo\n        ) - datetime.timedelta(minutes=30)\n\n        if offset == 0:\n            slot = candidate if candidate >= first else first\n        else:\n            slot = first\n\n        if slot <= last:\n            return slot\n\n    raise RuntimeError(\"No pickup slot found\")\n```",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmp7urw5pit/t.py\", line 52, in <module>\n    assert next_pickup_slot(D(2026,11,23,12,0)) == D(2026,11,23,18,0)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/tmp7urw5pit/t.py\", line 28, in next_pickup_slot\n    first = datetime.combine(\n            ^^^^^^^^^^^^^^^^\nAttributeError: module 'datetime' has no attribute 'combine'\n",
+     "finish": "stop",
+     "reasoning_chars": 21191
+    },
+    {
+     "ok": true,
+     "code": "import datetime\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    candidate = now.replace(second=0, microsecond=0)\n    minute_offset = (30 - candidate.minute) % 30\n\n    if minute_offset:\n        candidate += datetime.timedelta(minutes=minute_offset)\n\n    if candidate < now:\n        candidate += datetime.timedelta(minutes=30)\n\n    tzinfo = now.tzinfo\n\n    for offset in range(8):\n        day = now.date() + datetime.timedelta(days=offset)\n        weekday = day.weekday()\n\n        if weekday == 6:\n            continue\n\n        if weekday == 5:\n            start_hour, end_hour = 10, 16\n        else:\n            start_hour, end_hour = 18, 21\n\n        first = datetime.datetime(\n            day.year,\n            day.month,\n            day.day,\n            start_hour,\n            0,\n            0,\n            tzinfo=tzinfo,\n        )\n        last = datetime.datetime(\n            day.year,\n            day.month,\n            day.day,\n            end_hour,\n            0,\n            0,\n            tzinfo=tzinfo,\n        ) - datetime.timedelta(minutes=30)\n\n        if offset == 0:\n            slot = candidate if candidate >= first else first\n        else:\n            slot = first\n\n        if slot <= last:\n            return slot\n\n    raise RuntimeError(\"No pickup slot found\")\n",
+     "raw": "```python\nimport datetime\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    candidate = now.replace(second=0, microsecond=0)\n    minute_offset = (30 - candidate.minute) % 30\n\n    if minute_offset:\n        candidate += datetime.timedelta(minutes=minute_offset)\n\n    if candidate < now:\n        candidate += datetime.timedelta(minutes=30)\n\n    tzinfo = now.tzinfo\n\n    for offset in range(8):\n        day = now.date() + datetime.timedelta(days=offset)\n        weekday = day.weekday()\n\n        if weekday == 6:\n            continue\n\n        if weekday == 5:\n            start_hour, end_hour = 10, 16\n        else:\n            start_hour, end_hour = 18, 21\n\n        first = datetime.datetime(\n            day.year,\n            day.month,\n            day.day,\n            start_hour,\n            0,\n            0,\n            tzinfo=tzinfo,\n        )\n        last = datetime.datetime(\n            day.year,\n            day.month,\n            day.day,\n            end_hour,\n            0,\n            0,\n            tzinfo=tzinfo,\n        ) - datetime.timedelta(minutes=30)\n\n        if offset == 0:\n            slot = candidate if candidate >= first else first\n        else:\n            slot = first\n\n        if slot <= last:\n            return slot\n\n    raise RuntimeError(\"No pickup slot found\")\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 18938
+    }
+   ],
+   "seconds": 234.9,
+   "tokens": 12641,
+   "pass1": false,
+   "pass2": true
+  },
+  "c08_extract_json#1": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import json\n\n\ndef extract_json(text: str) -> dict | None:\n    \"\"\"\n    Find the first valid JSON object in the text and return it as a dict.\n\n    Returns None if no valid JSON object is found.\n    \"\"\"\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n    start = 0\n\n    while True:\n        start = text.find(\"{\", start)\n        if start == -1:\n            return None\n\n        try:\n            obj, end = decoder.raw_decode(text, start)\n        except ValueError:\n            start += 1\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n        start = end if end > start else start + 1\n",
+     "raw": "```python\nimport json\n\n\ndef extract_json(text: str) -> dict | None:\n    \"\"\"\n    Find the first valid JSON object in the text and return it as a dict.\n\n    Returns None if no valid JSON object is found.\n    \"\"\"\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n    start = 0\n\n    while True:\n        start = text.find(\"{\", start)\n        if start == -1:\n            return None\n\n        try:\n            obj, end = decoder.raw_decode(text, start)\n        except ValueError:\n            start += 1\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n        start = end if end > start else start + 1\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 77030
+    }
+   ],
+   "seconds": 393.6,
+   "tokens": 19210,
+   "pass1": true,
+   "pass2": true
+  },
+  "c08_extract_json#2": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import json\n\ndef extract_json(text: str) -> dict | None:\n    \"\"\"Return the first valid JSON object found in text, or None.\"\"\"\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n\n    for i, ch in enumerate(text):\n        if ch != \"{\":\n            continue\n\n        try:\n            obj, _ = decoder.raw_decode(text, i)\n        except (json.JSONDecodeError, RecursionError):\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n    return None\n",
+     "raw": "```python\nimport json\n\ndef extract_json(text: str) -> dict | None:\n    \"\"\"Return the first valid JSON object found in text, or None.\"\"\"\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n\n    for i, ch in enumerate(text):\n        if ch != \"{\":\n            continue\n\n        try:\n            obj, _ = decoder.raw_decode(text, i)\n        except (json.JSONDecodeError, RecursionError):\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n    return None\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 69114
+    }
+   ],
+   "seconds": 334.6,
+   "tokens": 16782,
+   "pass1": true,
+   "pass2": true
+  }
+ }
+}

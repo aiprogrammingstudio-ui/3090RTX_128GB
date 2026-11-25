@@ -1,0 +1,344 @@
+{
+ "label": "q27",
+ "model": "qwen3.8-27b",
+ "date": "2026-11-24 20:50",
+ "tools": {
+  "t01_simple": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2021"
+     }
+    }
+   ],
+   "answer": "Listing G-2021 (Gazelle Ultimate C380 HMB) has a battery health of **86%** (500 Wh battery, 8,400 km ridden).",
+   "bad_json": 0,
+   "seconds": 3.4,
+   "tokens": 118
+  },
+  "t02_enum_filter": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "max_price": 1500,
+      "status": "available"
+     }
+    }
+   ],
+   "answer": "- G-2021 — €1,450\n- G-2018 — €980",
+   "bad_json": 0,
+   "seconds": 3.1,
+   "tokens": 161
+  },
+  "t03_chain": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "available"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2018"
+     }
+    }
+   ],
+   "answer": "The cheapest available Gazelle is the **Gazelle Arroyo C7 (2018)** at €980. It has done **21,000 km**.",
+   "bad_json": 0,
+   "seconds": 4.2,
+   "tokens": 205
+  },
+  "t04_parallel": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_weather",
+     "args": {
+      "city": "Amersfoort",
+      "date": "2026-11-24"
+     }
+    },
+    {
+     "name": "get_weather",
+     "args": {
+      "city": "Utrecht",
+      "date": "2026-11-24"
+     }
+    }
+   ],
+   "answer": "Utrecht — only 0.5 mm of rain expected tomorrow, versus 4.5 mm in Amersfoort.",
+   "bad_json": 0,
+   "seconds": 4.1,
+   "tokens": 225
+  },
+  "t05_error_recovery": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G2018"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "any"
+     }
+    },
+    {
+     "name": "get_listing",
+     "args": {
+      "listing_id": "G-2018"
+     }
+    }
+   ],
+   "answer": "The Arroyo is listed as **G-2018**:\n\n- **Title:** Gazelle Arroyo C7\n- **Year:** 2018\n- **Price:** €980\n- **Battery:** 400 Wh, 71% health\n- **Mileage:** 21,000 km\n- **Status:** Available",
+   "bad_json": 0,
+   "seconds": 6.1,
+   "tokens": 312
+  },
+  "t06_no_tool": {
+   "ok": true,
+   "calls": [],
+   "answer": "Lithium-ion batteries lose capacity in the cold because low temperatures slow down the electrochemical reactions and increase internal resistance, so fewer ions can move between the electrodes and the battery delivers less usable energy.",
+   "bad_json": 0,
+   "seconds": 1.9,
+   "tokens": 91
+  },
+  "t07_files_sum": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "list_files",
+     "args": {}
+    },
+    {
+     "name": "read_file",
+     "args": {
+      "path": "sales/2026-10.csv"
+     }
+    },
+    {
+     "name": "read_file",
+     "args": {
+      "path": "notes.txt"
+     }
+    }
+   ],
+   "answer": "Total sales revenue in October 2026: **€2,680** (3 sales: €640 + €1,150 + €890).",
+   "bad_json": 0,
+   "seconds": 5.5,
+   "tokens": 266
+  },
+  "t08_dates": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_event",
+     "args": {
+      "title": "Pickup: Sanne – e-bike B-2019",
+      "date": "2026-11-28",
+      "start": "11:00",
+      "end": "12:00"
+     }
+    }
+   ],
+   "answer": "Done — pickup scheduled for Saturday 28 November, 11:00–12:00 (buyer Sanne, listing B-2019). It's a draft pending your approval.",
+   "bad_json": 0,
+   "seconds": 8.3,
+   "tokens": 467
+  },
+  "t09_nested_args": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice created (id: draft-1, pending your approval):\n\n- Batavus Finez E-go (used): 1 × €700\n- Bike locks: 2 × €35\n- VAT: 0% (margin scheme)\n- **Total: €770**",
+   "bad_json": 0,
+   "seconds": 4.9,
+   "tokens": 276
+  },
+  "t10_status_trap": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Sparta"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "status": "any"
+     }
+    }
+   ],
+   "answer": "No — the Sparta M7b (€1,100) has already been sold. If the buyer is still interested, I can suggest one of the other available bikes.",
+   "bad_json": 0,
+   "seconds": 4.0,
+   "tokens": 174
+  }
+ },
+ "code": {
+  "c01_parse_price": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmp7afl7hsx/t.py\", line 3, in <module>\n    assert parse_price('€ 1.450,-') == 1450.0\n           ^^^^^^^^^^^\nNameError: name 'parse_price' is not defined\n",
+     "finish": "length"
+    },
+    {
+     "ok": false,
+     "code": "",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmp3lknbp_k/t.py\", line 3, in <module>\n    assert parse_price('€ 1.450,-') == 1450.0\n           ^^^^^^^^^^^\nNameError: name 'parse_price' is not defined\n",
+     "finish": "length"
+    }
+   ],
+   "seconds": 297.2,
+   "tokens": 16000,
+   "pass1": false,
+   "pass2": false
+  },
+  "c02_postcode": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import re\n\n_POSTCODE_PATTERN = re.compile(r\"[1-9]\\d{3} ?[A-Za-z]{2}\")\n_INVALID_LETTER_PAIRS = {\"SA\", \"SD\", \"SS\"}\n\n\ndef is_valid_postcode(s: str) -> bool:\n    if not isinstance(s, str):\n        return False\n\n    if not _POSTCODE_PATTERN.fullmatch(s):\n        return False\n\n    return s[-2:].upper() not in _INVALID_LETTER_PAIRS\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 12.8,
+   "tokens": 654,
+   "pass1": true,
+   "pass2": true
+  },
+  "c03_next_slot": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmp665yc09v/t.py\", line 5, in <module>\n    assert next_pickup_slot(D(2026,11,23,12,0)) == D(2026,11,23,18,0)\n           ^^^^^^^^^^^^^^^^\nNameError: name 'next_pickup_slot' is not defined\n",
+     "finish": "length"
+    },
+    {
+     "ok": true,
+     "code": "import datetime\n\n\ndef next_pickup_slot(now: datetime.datetime) -> datetime.datetime:\n    candidate = now.replace(second=0, microsecond=0)\n    candidate = candidate.replace(minute=(candidate.minute // 30) * 30)\n\n    if candidate < now:\n        candidate += datetime.timedelta(minutes=30)\n\n    tzinfo = now.tzinfo\n    start_date = candidate.date()\n\n    for offset in range(7):\n        day = start_date + datetime.timedelta(days=offset)\n        weekday = day.weekday()\n\n        if weekday == 6:\n            continue\n\n        if weekday == 5:\n            start_hour = 10\n            end_hour = 16\n        else:\n            start_hour = 18\n            end_hour = 21\n\n        first = datetime.datetime.combine(\n            day,\n            datetime.time(start_hour, 0),\n            tzinfo=tzinfo,\n        )\n        last = datetime.datetime.combine(\n            day,\n            datetime.time(end_hour, 0),\n            tzinfo=tzinfo,\n        ) - datetime.timedelta(minutes=30)\n\n        if offset == 0:\n            if candidate < first:\n                return first\n            if candidate > last:\n                continue\n            return candidate\n\n        return first\n\n    raise RuntimeError(\"No pickup slot found\")\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 291.1,
+   "tokens": 15995,
+   "pass1": false,
+   "pass2": true
+  },
+  "c04_dedupe": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "def dedupe(listings: list[dict]) -> list[dict]:\n    def normalize_title(title: str) -> str:\n        return \" \".join(title.lower().split())\n\n    best_index: dict[tuple[str, int], int] = {}\n    best_date: dict[tuple[str, int], str] = {}\n\n    for index, listing in enumerate(listings):\n        key = (normalize_title(listing[\"title\"]), listing[\"price\"])\n        date = listing[\"date\"]\n\n        if key not in best_index:\n            best_index[key] = index\n            best_date[key] = date\n        elif date < best_date[key]:\n            best_index[key] = index\n            best_date[key] = date\n\n    return [listings[index] for index in sorted(best_index.values())]\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 35.3,
+   "tokens": 1867,
+   "pass1": true,
+   "pass2": true
+  },
+  "c05_fix_bug": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "def add_tag(tag, tags=[]):\n    tags = list(tags)\n    if tag not in tags:\n        tags.append(tag)\n    return sorted(tags)\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 86.6,
+   "tokens": 4363,
+   "pass1": true,
+   "pass2": true
+  },
+  "c06_csv_totals": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import csv\nimport io\nfrom decimal import Decimal, InvalidOperation\n\n\ndef totals_by_payment(csv_text: str) -> dict[str, int]:\n    totals: dict[str, Decimal] = {}\n\n    if not csv_text:\n        return totals\n\n    text = csv_text.lstrip(\"\\ufeff\")\n    reader = csv.DictReader(io.StringIO(text), skipinitialspace=True)\n\n    if reader.fieldnames:\n        reader.fieldnames = [(name or \"\").strip() for name in reader.fieldnames]\n\n    for row in reader:\n        price_raw = row.get(\"price\")\n        payment_raw = row.get(\"payment\")\n\n        if price_raw is None or payment_raw is None:\n            continue\n\n        price_clean = \"\".join(price_raw.replace(\",\", \"\").split())\n        if not price_clean:\n            continue\n\n        payment = payment_raw.strip().lower()\n        if not payment:\n            continue\n\n        try:\n            price = Decimal(price_clean)\n        except InvalidOperation:\n            continue\n\n        if not price.is_finite():\n            continue\n\n        totals[payment] = totals.get(payment, Decimal(0)) + price\n\n    return {payment: int(total) for payment, total in totals.items()}\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 149.5,
+   "tokens": 7944,
+   "pass1": true,
+   "pass2": true
+  },
+  "c07_retry": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import time\n\ndef retry(fn, attempts=3, exceptions=(Exception,), sleep=time.sleep, base_delay=1.0):\n    for i in range(attempts):\n        try:\n            return fn()\n        except exceptions:\n            if i == attempts - 1:\n                raise\n            sleep(base_delay * (2 ** i))\n",
+     "test_output": "ALL_OK\n",
+     "finish": "stop"
+    }
+   ],
+   "seconds": 29.7,
+   "tokens": 1585,
+   "pass1": true,
+   "pass2": true
+  },
+  "c08_extract_json": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmppzeqohjs/t.py\", line 3, in <module>\n    assert extract_json('Sure! ```json\\n{\"a\": 1}\\n``` done')=={'a':1}\n           ^^^^^^^^^^^^\nNameError: name 'extract_json' is not defined\n",
+     "finish": "length"
+    },
+    {
+     "ok": false,
+     "code": "",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmp8jakc_ab/t.py\", line 3, in <module>\n    assert extract_json('Sure! ```json\\n{\"a\": 1}\\n``` done')=={'a':1}\n           ^^^^^^^^^^^^\nNameError: name 'extract_json' is not defined\n",
+     "finish": "length"
+    }
+   ],
+   "seconds": 322.0,
+   "tokens": 16000,
+   "pass1": false,
+   "pass2": false
+  }
+ }
+}

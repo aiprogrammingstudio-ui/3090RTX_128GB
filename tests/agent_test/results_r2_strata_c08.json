@@ -1,0 +1,56 @@
+{
+ "label": "r2_strata_c08",
+ "model": "qwen3.8-flash-next-unsloth-ud-q5_k_xl",
+ "date": "2026-11-24 21:18",
+ "tools": {},
+ "code": {
+  "c08_extract_json#1": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import json\n\ndef extract_json(text: str) -> dict | None:\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n    start = text.find(\"{\")\n\n    while start != -1:\n        try:\n            obj, _ = decoder.raw_decode(text, start)\n        except ValueError:\n            start = text.find(\"{\", start + 1)\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n        start = text.find(\"{\", start + 1)\n\n    return None\n",
+     "raw": "```python\nimport json\n\ndef extract_json(text: str) -> dict | None:\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n    start = text.find(\"{\")\n\n    while start != -1:\n        try:\n            obj, _ = decoder.raw_decode(text, start)\n        except ValueError:\n            start = text.find(\"{\", start + 1)\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n        start = text.find(\"{\", start + 1)\n\n    return None\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 25212
+    }
+   ],
+   "seconds": 111.6,
+   "tokens": 6143,
+   "pass1": true,
+   "pass2": true
+  },
+  "c08_extract_json#2": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import json\nfrom typing import Optional\n\n\ndef extract_json(text: str) -> Optional[dict]:\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n    pos = 0\n\n    while True:\n        start = text.find(\"{\", pos)\n        if start == -1:\n            return None\n\n        try:\n            obj, end = decoder.raw_decode(text, start)\n        except json.JSONDecodeError:\n            pos = start + 1\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n        pos = max(end, start + 1)\n",
+     "raw": "```python\nimport json\nfrom typing import Optional\n\n\ndef extract_json(text: str) -> Optional[dict]:\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n    pos = 0\n\n    while True:\n        start = text.find(\"{\", pos)\n        if start == -1:\n            return None\n\n        try:\n            obj, end = decoder.raw_decode(text, start)\n        except json.JSONDecodeError:\n            pos = start + 1\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n        pos = max(end, start + 1)\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 25155
+    }
+   ],
+   "seconds": 107.2,
+   "tokens": 6158,
+   "pass1": true,
+   "pass2": true
+  },
+  "c08_extract_json#3": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import json\nfrom typing import Optional\n\n\ndef extract_json(text: str) -> Optional[dict]:\n    \"\"\"\n    Find the first valid JSON object in text and return it as a dict.\n\n    Handles:\n    - prose before/after the object\n    - ```json fences and plain ``` fences\n    - braces inside JSON strings\n    - invalid JSON objects before a later valid one\n\n    Returns None if no valid JSON object is found.\n    \"\"\"\n    if not text:\n        return None\n\n    decoder = json.JSONDecoder()\n    start = text.find(\"{\")\n\n    while start != -1:\n        try:\n            obj, _ = decoder.raw_decode(text, start)\n        except json.JSONDecodeError:\n            start = text.find(\"{\", start + 1)\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n        start = text.find(\"{\", start + 1)\n\n    return None\n",
+     "raw": "```python\nimport json\nfrom typing import Optional\n\n\ndef extract_json(text: str) -> Optional[dict]:\n    \"\"\"\n    Find the first valid JSON object in text and return it as a dict.\n\n    Handles:\n    - prose before/after the object\n    - ```json fences and plain ``` fences\n    - braces inside JSON strings\n    - invalid JSON objects before a later valid one\n\n    Returns None if no valid JSON object is found.\n    \"\"\"\n    if not text:\n        return None\n\n    decoder = json.JSONDecoder()\n    start = text.find(\"{\")\n\n    while start != -1:\n        try:\n            obj, _ = decoder.raw_decode(text, start)\n        except json.JSONDecodeError:\n            start = text.find(\"{\", start + 1)\n            continue\n\n        if isinstance(obj, dict):\n            return obj\n\n        start = text.find(\"{\", start + 1)\n\n    return None\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 25844
+    }
+   ],
+   "seconds": 111.7,
+   "tokens": 6224,
+   "pass1": true,
+   "pass2": true
+  }
+ }
+}

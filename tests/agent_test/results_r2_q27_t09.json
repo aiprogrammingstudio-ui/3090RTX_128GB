@@ -1,0 +1,148 @@
+{
+ "label": "r2_q27_t09",
+ "model": "qwen3.8-27b",
+ "date": "2026-11-24 21:24",
+ "tools": {
+  "t09_nested_args#1": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice created (ID: draft-1) for Jan de Vries:\n- 1× Batavus Finez E-go — €700\n- 2× Bike lock — €35 each (€70)\n- 0% VAT (margin scheme)\n\nTotal: €770. It's pending your approval.",
+   "bad_json": 0,
+   "seconds": 8.5,
+   "tokens": 435
+  },
+  "t09_nested_args#2": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used e-bike, margin scheme)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice created (draft-1) for Jan de Vries:\n\n- 1× Batavus Finez E-go (used, margin scheme) – €700\n- 2× Bike locks – €70\n- VAT: 0%\n\nTotal: €770. It's pending your approval.",
+   "bad_json": 0,
+   "seconds": 4.6,
+   "tokens": 275
+  },
+  "t09_nested_args#3": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used e-bike)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice created (id: draft-1) for Jan de Vries:\n\n- 1× Batavus Finez E-go — €700\n- 2× Bike locks — €35 each (€70)\n\nTotal: €770, 0% VAT (margin scheme). It's pending your approval.",
+   "bad_json": 0,
+   "seconds": 5.1,
+   "tokens": 307
+  },
+  "t09_nested_args#4": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used e-bike)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice created (id: draft-1) for Jan de Vries:\n- 1× Batavus Finez E-go — €700\n- 2× Bike locks — €35 each\n\n0% VAT (margin scheme), total €770. It's pending your approval.",
+   "bad_json": 0,
+   "seconds": 9.5,
+   "tokens": 553
+  },
+  "t09_nested_args#5": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "create_invoice",
+     "args": {
+      "customer": "Jan de Vries",
+      "items": [
+       {
+        "description": "Batavus Finez E-go (used e-bike, margin scheme)",
+        "qty": 1,
+        "unit_price": 700
+       },
+       {
+        "description": "Bike lock",
+        "qty": 2,
+        "unit_price": 35
+       }
+      ],
+      "vat_pct": 0
+     }
+    }
+   ],
+   "answer": "Draft invoice created (draft-1): 1× Batavus Finez E-go €700 + 2× bike locks €35 = **€770, 0% VAT** (margin scheme). It's pending your approval.",
+   "bad_json": 0,
+   "seconds": 6.2,
+   "tokens": 356
+  }
+ },
+ "code": {}
+}

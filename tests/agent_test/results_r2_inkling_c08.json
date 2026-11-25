@@ -1,0 +1,64 @@
+{
+ "label": "r2_inkling_c08",
+ "model": "inkling-2-mini",
+ "date": "2026-11-24 22:22",
+ "tools": {},
+ "code": {
+  "c08_extract_json#1": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import json\n\ndef extract_json(text: str):\n    decoder = json.JSONDecoder()\n    pos = 0\n    while True:\n        start = text.find('{', pos)\n        if start == -1:\n            return None\n        try:\n            obj, _end = decoder.raw_decode(text, start)\n        except json.JSONDecodeError:\n            pos = start + 1\n            continue\n        if isinstance(obj, dict):\n            return obj\n        pos = start + 1\n",
+     "raw": "```python\nimport json\n\ndef extract_json(text: str):\n    decoder = json.JSONDecoder()\n    pos = 0\n    while True:\n        start = text.find('{', pos)\n        if start == -1:\n            return None\n        try:\n            obj, _end = decoder.raw_decode(text, start)\n        except json.JSONDecodeError:\n            pos = start + 1\n            continue\n        if isinstance(obj, dict):\n            return obj\n        pos = start + 1\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 9108
+    }
+   ],
+   "seconds": 13.9,
+   "tokens": 2855,
+   "pass1": true,
+   "pass2": true
+  },
+  "c08_extract_json#2": {
+   "attempts": [
+    {
+     "ok": true,
+     "code": "import json\n\n\ndef extract_json(text: str):\n    if not isinstance(text, str):\n        return None\n    decoder = json.JSONDecoder()\n    for i, ch in enumerate(text):\n        if ch != '{':\n            continue\n        try:\n            obj, _ = decoder.raw_decode(text, i)\n        except Exception:\n            continue\n        if isinstance(obj, dict):\n            return obj\n    return None\n",
+     "raw": "```python\nimport json\n\n\ndef extract_json(text: str):\n    if not isinstance(text, str):\n        return None\n    decoder = json.JSONDecoder()\n    for i, ch in enumerate(text):\n        if ch != '{':\n            continue\n        try:\n            obj, _ = decoder.raw_decode(text, i)\n        except Exception:\n            continue\n        if isinstance(obj, dict):\n            return obj\n    return None\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 19504
+    }
+   ],
+   "seconds": 33.8,
+   "tokens": 6011,
+   "pass1": true,
+   "pass2": true
+  },
+  "c08_extract_json#3": {
+   "attempts": [
+    {
+     "ok": false,
+     "code": "import json\n\n\ndef extract_json(text: str):\n    \"\"\"Return the first valid JSON object found in `text`, or None.\"\"\"\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n\n    for i, ch in enumerate(text):\n        if ch != '{':\n            continue\n        try:\n            obj, _end = decoder.decode(text, i)\n        except ValueError:\n            continue\n        if isinstance(obj, dict):\n            return obj\n\n    return None\n",
+     "raw": "```python\nimport json\n\n\ndef extract_json(text: str):\n    \"\"\"Return the first valid JSON object found in `text`, or None.\"\"\"\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n\n    for i, ch in enumerate(text):\n        if ch != '{':\n            continue\n        try:\n            obj, _end = decoder.decode(text, i)\n        except ValueError:\n            continue\n        if isinstance(obj, dict):\n            return obj\n\n    return None\n```",
+     "test_output": "Traceback (most recent call last):\n  File \"/tmp/tmprj6_xmkg/t.py\", line 24, in <module>\n    assert extract_json('Sure! ```json\\n{\"a\": 1}\\n``` done')=={'a':1}\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/tmprj6_xmkg/t.py\", line 15, in extract_json\n    obj, _end = decoder.decode(text, i)\n                ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n                                      ^^^^^^^^\nTypeError: 'int' object is not callable\n",
+     "finish": "stop",
+     "reasoning_chars": 5654
+    },
+    {
+     "ok": true,
+     "code": "import json\n\n\ndef extract_json(text: str):\n    \"\"\"Return the first valid JSON object found in `text`, or None.\"\"\"\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n\n    for i, ch in enumerate(text):\n        if ch != '{':\n            continue\n        try:\n            obj, _end = decoder.raw_decode(text, i)\n        except ValueError:\n            continue\n        if isinstance(obj, dict):\n            return obj\n\n    return None\n",
+     "raw": "```python\nimport json\n\n\ndef extract_json(text: str):\n    \"\"\"Return the first valid JSON object found in `text`, or None.\"\"\"\n    if not isinstance(text, str):\n        return None\n\n    decoder = json.JSONDecoder()\n\n    for i, ch in enumerate(text):\n        if ch != '{':\n            continue\n        try:\n            obj, _end = decoder.raw_decode(text, i)\n        except ValueError:\n            continue\n        if isinstance(obj, dict):\n            return obj\n\n    return None\n```",
+     "test_output": "ALL_OK\n",
+     "finish": "stop",
+     "reasoning_chars": 1516
+    }
+   ],
+   "seconds": 12.8,
+   "tokens": 2243,
+   "pass1": false,
+   "pass2": true
+  }
+ }
+}
