@@ -63,6 +63,20 @@ and agent tests used the same client and settings for all three.
 
 - DSpark speeds up one request by about 30% on this free prose. With six requests the GPU is already at its 250 W
   cap, so drafting costs about 5%.
+- **By number of parallel requests** (2026-11-25, same script and prompts, second of two runs):
+
+  | Requests | DSpark on: total tok/s (per stream) | DSpark off: total tok/s (per stream) | DSpark gain |
+  |---|---|---|---|
+  | 1 | 122 (129) | 106 (110) | +15% |
+  | 2 | 186 (99–106) | 175 (93) | +6% |
+  | 3 | 252 (90–113) | 228 (81) | +11% |
+  | 4 | 276 (75–97) | 266 (71) | +4% |
+  | 6 | 340 (60–72) | 335 (59) | +1% |
+
+  The card sat at its 250 W cap (average 241 W) and the SM clock averaged 1,333 MHz with DSpark and 1,432 MHz
+  without: at the power cap, drafting takes power that batching would otherwise use. Adding up per-stream speeds
+  (as you'd do by reading the tok/s of several chat windows) gives more than the total here, because the streams
+  finish at different times.
 - On tool calls and code DSpark pays much more. The same agent test (below), run twice with DSpark on and twice with
   `SPEC=off`, gave the same scores but:
 
