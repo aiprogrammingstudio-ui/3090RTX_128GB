@@ -143,7 +143,7 @@ again, as a minimal agent loop would.
 | q27, 32K tokens (3 hard tasks, 2 runs each) | 3/6 | 6/6 | the price parser still ran out of tokens twice, after 17–18 min of thinking |
 | Strata | 8/8 | 8/8 | ~10 min in total |
 
-The first harness version cut off code that contained ``` inside strings, which caused two false failures. The
+The first harness version cut off code that contained `` ``` `` inside strings, which caused two false failures. The
 fixed harness is the one in this repo, and the reruns are in `results_r2_*.json`. Always check your harness with
 reference solutions before blaming the model.
 
