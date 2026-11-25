@@ -92,6 +92,8 @@ are in **bold**.
 | Setting | Value | Note |
 |---|---|---|
 | `SPEC` | `dspark` (default) | `num_speculative_tokens` 7, `SPEC_K=[[1,2,4],[3,8,3]]`, `SPEC_DRAFT=probabilistic` |
+| `HYPERINKLING_SPEC_ADAPTIVE` | `2,4,7` (default) | verify length chosen per step (replaces `SPEC_K` while on) |
+| `HYPERINKLING_LOOKUP` | 1 (default) | drafts copied from the request's own context on a match of 8+ tokens |
 | `MAX_SEQS` | 8 (default) | |
 | `MAX_LEN` | auto (default) | served as 268,544 tokens |
 | `NBT` (prefill chunk) | 2048 (default) | `LONG_PREFILL` 1024 |
