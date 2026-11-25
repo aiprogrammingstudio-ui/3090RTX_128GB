@@ -63,9 +63,88 @@ and agent tests used the same client and settings for all three.
 
 - DSpark speeds up one request by about 30%. With six requests the GPU is already at its 250 W cap, so drafting
   costs about 5%.
-- HyperInkling's own README reports ~611 tok/s for 6 streams on a 3090 at 320 W with
-  [gpu-unlock](https://github.com/zagitta/gpu-unlock). We used neither, so expect about half of that at 250 W.
+- HyperInkling's own README reports 611–686 tok/s for 6 streams. Those runs used more power, gpu-unlock and a
+  different way of measuring; see [Inkling: exact configuration](#inkling-exact-configuration-and-the-600-toks-reports).
 - Startup time: Inkling ~70 s (~4 min on the first start, while it compiles kernels); Strata ~2 min.
+
+## Inkling: exact configuration and the 600+ tok/s reports
+
+We installed HyperInkling exactly as its README describes (docker compose, prebuilt image). Changes from the defaults
+are in **bold**.
+
+**Software**
+
+| | Ours |
+|---|---|
+| HyperInkling | 0.1.4, git `14f2283` (2026-11-24) |
+| Image | `ghcr.io/pento95/hyperinkling:0.1.4`, digest `sha256:0cdd2f1b788f…bfb42721` |
+| Checkpoint | `Pentium95/Inkling-2-Mini-W4A16-g128-gptq` (INT4 experts, INT8 attention / LM head) |
+| Host OS | Ubuntu 24.04.5, kernel 6.8.0-149 (HyperInkling was tested on Fedora 44) |
+| NVIDIA driver / CUDA | 595.99.02 / 13.2 (driver 580+ is required) |
+| Docker / Compose | 29.1.3 / 2.40.3, NVIDIA Container Toolkit from NVIDIA's apt repository |
+| GPU | RTX 3090 (not Ti), VBIOS 94.02.42.80.88, headless (no display attached), persistence mode on |
+| GPU link | PCIe 3.0 x16 (the T5810 has no PCIe 4.0) |
+| GPU power limit | **250 W** (board maximum 390 W; our PSU can't deliver more under CPU+GPU load) |
+| gpu-unlock | **not used** |
+
+**Server settings** (`.env` plus the defaults of `start.sh`)
+
+| Setting | Value | Note |
+|---|---|---|
+| `SPEC` | `dspark` (default) | `num_speculative_tokens` 7, `SPEC_K=[[1,2,4],[3,8,3]]`, `SPEC_DRAFT=probabilistic` |
+| `MAX_SEQS` | 8 (default) | |
+| `MAX_LEN` | auto (default) | served as 268,544 tokens |
+| `NBT` (prefill chunk) | 2048 (default) | `LONG_PREFILL` 1024 |
+| `KV_DTYPE` | fp8 (default) | E4M3, emulated on sm86 |
+| `GPU_UTIL` | 0.95 (default) | ~21 GB VRAM in use |
+| `ASYNC` | 1 (default) | async scheduling |
+| `WARMUP` | 1 (default) | |
+| `KV_OFFLOAD_GB` | **16** | default "auto" = min(0.6 × RAM − 8, 36) = 36 GB of RAM for the CPU prefix cache; we keep it smaller |
+| `SHM_GB` | **24** | default 48 |
+| `BIND`, `PORT` | **127.0.0.1, 8080** | local only; reached over an SSH tunnel |
+| compose `restart` | **"no"** (override file) | default `unless-stopped` would take the GPU on every boot |
+
+**How our numbers compare with the published ones**
+
+| | HyperInkling README | HyperInkling field report | **Ours** |
+|---|---|---|---|
+| GPU | RTX 3090 Ti | RTX 3090 | RTX 3090 |
+| Power | 350 W, undervolted | 320 W | **250 W** |
+| gpu-unlock | yes | yes | no |
+| Version | 0.1.x | 0.1.2 | 0.1.4 |
+| Benchmark | `bench/context_bench.sh` | same | `scripts/quick_bench.py 6 512` |
+| Prompt | 8k or 32k tokens (AA-LCR documents), greedy | same | short one-line prompts, greedy, `ignore_eos` |
+| What "aggregate" counts | decode only, **while all 6 requests generate** (prefix-cache hits, no prefill inside) | same | total tokens ÷ wall time of the whole run, so including time to first token and the tail when the faster streams have already finished |
+| 1 request, DSpark | 267 (8k) / 188 (32k) | 268 / 180 | 138 |
+| 1 request, no DSpark | 131 / 124 | 123 / 116 | 106 |
+| 6 requests, DSpark, aggregate | **686 / 646** | **611 / 590** | 318–329 |
+| 6 requests, DSpark, per request | 114 / 108 | 102 / 98 | 56–79 |
+| 6 requests, no DSpark, aggregate | 407 / 350 | 381 / 326 | 335–340 |
+
+What probably explains the gap, most important first:
+
+1. **Power.** The card reached its 250 W cap during the benchmark runs. In a separate single-request check at
+   218–235 W, the SM clock was 1,245–1,500 MHz (maximum 2,115 MHz). The field report ran the same non-Ti card at 320 W.
+2. **The measurement.** Our script divides by the wall time of the whole run, so the tail counts too: with DSpark the
+   streams run at different speeds (56–79 tok/s), and the fastest ones finish early. The published numbers count only
+   the window in which all six requests generate. Our numbers are therefore not directly comparable; they're closer
+   to what a user of six chats experiences.
+3. **The text.** DSpark gains most on text that repeats the prompt (summaries of a long document, code) and least on
+   free prose. Our prompts asked for free prose, while the published runs asked for summaries of 8k–32k documents.
+4. **gpu-unlock** raises the bf16 tensor-core rate. Per HyperInkling's README, this changes prefill much more than
+   decode, so it explains little of the decode gap.
+5. **3090 Ti vs 3090:** about 7% more memory bandwidth (1,008 vs 936 GB/s) and more SMs on the Ti.
+
+**To compare your 3090 / 3090 Ti setup with ours or with the 600+ numbers:**
+
+- With our method: `python3 scripts/quick_bench.py 1 512 8080` and `python3 scripts/quick_bench.py 6 512 8080`
+  (from the HyperInkling checkout). Run each twice and keep the second run (the first compiles kernels). For
+  DSpark off, add `SPEC=off` to `.env` and recreate the container.
+- With the published method: `bench/context_bench.sh` (needs the AA-LCR dataset in `~/.cache/evalscope`).
+- Report: GPU model, power limit, gpu-unlock yes/no, HyperInkling version, driver, and the SM clock under load
+  (`nvidia-smi --query-gpu=power.draw,clocks.sm --format=csv -l 1`).
+
+We plan to rerun both benchmarks at 320 W once a bigger PSU is installed, and will add the numbers here.
 
 ## Writing test: Marktplaats seller replies
 
