@@ -65,3 +65,31 @@ Reply times: Inkling 3–9 s, q27 3–25 s, Strata 7–23 s (much less thinking 
 are mostly sendable; its weak spots are judgement (price, role, meta text), not language. For a Dutch Marktplaats
 assistant the round 1 verdict stands. Both big models now gave away the floor to a low bid: the prompt should say
 how to negotiate (e.g. counter near the asking price first).
+
+## HyperQwen (2026-11-25; `results_nl_hyperqwen.json`, `results_en_hyperqwen.json`; not in the blind sheet)
+Same Qwen3.8-27B as q27, but 4-bit (W4A16 AutoRound, `-fast` variant with 4-bit lm_head) on HyperQwen, 250 W.
+Reply times: NL median 7.4 s (3.7–35.7), EN 6.0 s (2.3–8.5); q27: NL 16.5 s (7.2–80.1), EN 7.8 s (3.4–25.1).
+
+- **Dutch:** natural and short, close to q27; no address or phone number given, no link or code used, nothing invented.
+  Small misses: p01 "ik kijk na of de fiets nog beschikbaar is" instead of confirming; p08 "Verder noemen we geen
+  gebreken" (odd wording, sounds evasive); p03 countered at EUR 1.400 (allowed, less sales sense than 1.300).
+  t03: like q27, asks for the listing id the buyer already gave, and uses markdown bold.
+- **English:** fluent. p02 and p03 said "I can go as low as 1,300" / "1,300 is the lowest I can do" (gives away the floor);
+  p09 one third-person slip ("the seller can check").
+- **Floor-price leak, repeated (p02 + p03, NL + EN, 5x each = 20 replies per model, temperature 0.7):** HyperQwen stated
+  the floor outright ("lowest", "minimum", "can't go below") in ~5/20; **q27 in ~4/20** ("the lowest I can go is 1,300"
+  twice, "Ik kom er niet onder de 1.300", and even "Ik kan maximaal €1.300 doen"). Same rate within noise: this is the
+  model + prompt, not the quant. Fix belongs in the prompt (how to negotiate, never say "lowest/minimum").
+
+**Verdict:** writing quality ≈ q27 (one or two slightly clumsier Dutch phrases in 10), at about half the reply time.
+
+## HyperQwen after gpu-unlock (370 W; 2026-11-26; `results_nl_hyperqwen_unlock.json`, `results_en_hyperqwen_unlock.json`)
+Reply times: NL median 6.2 s (3.9–31.2), EN 4.3 s (2.4–9.6); before the unlock at 250 W: NL 7.4 s, EN 6.0 s.
+
+- Same character as the first HyperQwen run: short, natural, no invented facts, no address/phone given, scam link and
+  code refused, pickup-only and times correct in every reply. Tool part: t01/t02 right calls; NL t03 again asks for
+  the listing id the buyer gave and uses markdown bold (as q27 and the first run).
+- Small misses: NL p03 "de laagste prijs is EUR 1.300" (floor leak, the known model + prompt issue); EN p03 counters
+  exactly at the floor; NL p01 third-person slip ("de verkoper kijkt dat na"); NL p07 starts with a "Concept:" label;
+  NL p02 "als je binnen de vraagprijs komt" (odd wording).
+- **Verdict:** no change in writing quality after gpu-unlock; output is coherent in both languages (no sign of wrong math).

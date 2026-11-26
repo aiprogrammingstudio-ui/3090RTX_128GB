@@ -1,0 +1,96 @@
+{
+ "label": "hyperqwen_unlock_t02",
+ "model": "qwen3.8-27b",
+ "date": "2026-11-25 23:54",
+ "tools": {
+  "t02_enum_filter#1": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "available"
+     }
+    }
+   ],
+   "answer": "\n\n- G-2021 — €1,450\n- G-2018 — €980",
+   "bad_json": 0,
+   "seconds": 1.6,
+   "tokens": 146
+  },
+  "t02_enum_filter#2": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "available"
+     }
+    }
+   ],
+   "answer": "\n\n- G-2021 — €1450\n- G-2018 — €980",
+   "bad_json": 0,
+   "seconds": 1.4,
+   "tokens": 131
+  },
+  "t02_enum_filter#3": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "available"
+     }
+    },
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "available"
+     }
+    }
+   ],
+   "answer": "\n\n- G-2021 — €1450\n- G-2018 — €980",
+   "bad_json": 0,
+   "seconds": 1.9,
+   "tokens": 201
+  },
+  "t02_enum_filter#4": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "max_price": 1500,
+      "status": "available"
+     }
+    }
+   ],
+   "answer": "\n\n- G-2021 — €1450\n- G-2018 — €980",
+   "bad_json": 0,
+   "seconds": 2.1,
+   "tokens": 230
+  },
+  "t02_enum_filter#5": {
+   "ok": true,
+   "calls": [
+    {
+     "name": "search_listings",
+     "args": {
+      "brand": "Gazelle",
+      "status": "available"
+     }
+    }
+   ],
+   "answer": "\n\n- G-2021 — €1,450\n- G-2018 — €980",
+   "bad_json": 0,
+   "seconds": 1.4,
+   "tokens": 124
+  }
+ },
+ "code": {}
+}
