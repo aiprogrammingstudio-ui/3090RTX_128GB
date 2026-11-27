@@ -10,6 +10,11 @@ capped at 250 W). **gpu-unlock** is active. We added **HyperQwen** (the 27B in 4
 **Strata UD-Q4_K_XL** quant next to Q5, then reran every speed test. The first version of this page (24–25 November,
 250 W, three setups) is in the git history. Its quality results are still here and are marked "250 W".
 
+**What changed on 27 November 2026:** the kernel option **`iommu=pt`** (prefill +7–15% on Strata and Inkling, decode the
+same), a full speed rerun of every setup, first numbers for HyperQwen's **150K and 240K** profiles, and a list of Strata
+tuning attempts that did *not* help on this machine, with the RAM bandwidth Strata really uses
+([27 November](#iommupt-and-a-full-rerun-27-november), [tuning](#tuning-strata-on-this-machine-what-did-not-help)).
+
 **Short version**
 
 - **Best all-rounder: HyperQwen.** It runs the same Qwen3.8-27B as llama.cpp, at **129 tok/s** with one request and
@@ -18,6 +23,7 @@ capped at 250 W). **gpu-unlock** is active. We added **HyperQwen** (the 27B in 4
   small agents. Its Dutch is weaker, and it breaks JSON when a tool argument is an array of objects.
 - **Biggest model: Strata 125B MoE**, with the experts in system RAM. UD-Q4_K_XL is **+18% faster** than UD-Q5_K_XL
   (80 against 67 tok/s) and uses 20 GB less RAM. It writes as well as the 27B and was the best at coding on our tasks.
+- **Best for many users at once: HyperQwen 150K** (MTP drafting): 402 tok/s in total with 6 requests, 98 with one.
 - **Software beat hardware:** on the same GPU and the same 27B model, HyperQwen and ninfer are 2–2.5x faster than llama.cpp.
 
 ## The machine
@@ -31,7 +37,7 @@ capped at 250 W). **gpu-unlock** is active. We added **HyperQwen** (the 27B in 4
 | GPU power | **370 W limit** (the card's default; it allows 100–390 W) |
 | PSU | Dell 685 W for the board, CPU and the 75 W PCIe slot; a **1400 W server PSU with a breakout board** for the card's two 8-pin connectors |
 | GPU firmware patch | gpu-unlock 2.0.0 by Zagitta (raises the FP16/BF16 tensor-core rate with fp32 accumulate) |
-| OS / driver | Ubuntu 24.04, NVIDIA 595.99 / CUDA 13.2 |
+| OS / driver | Ubuntu 24.04, kernel 6.8, NVIDIA 595.99 / CUDA 13.2; kernel option `iommu=pt` since 27 November |
 
 **About the PSU:** the old 685 W PSU tripped at 300 W of GPU load under CPU load, so the card ran at 250 W with a 1,500 MHz
 clock lock. A used server PSU now powers the 8-pins: each 8-pin socket gets its own 6-pin cable from the breakout
@@ -45,7 +51,7 @@ Only one runs at a time on the single GPU, on port 8080. All run with thinking/r
 
 | | Engine | Model / quant | Drafting (speculative decoding) | Context |
 |---|---|---|---|---|
-| **HyperQwen** | HyperQwen (patched vLLM 0.33, docker, image `ghcr.io/syv-ai/hyperqwen`) | Qwen3.8-27B W4A16 AutoRound, `-fast` variant (4-bit LM head) | DFlash2 | 64K (150K / 240K profiles not measured yet) |
+| **HyperQwen** | HyperQwen (patched vLLM 0.33, docker, image `ghcr.io/syv-ai/hyperqwen`) | Qwen3.8-27B W4A16 AutoRound, `-fast` variant (4-bit LM head) | DFlash2 (MTP in the 150K profile) | 64K; also 150K (fp8/int8 KV) and 240K (KVarN 4/2-bit KV, 2 slots) |
 | **Inkling** | [HyperInkling](https://github.com/Pento95/HyperInkling) 0.1.4 (patched vLLM, docker) | Inkling 2 Mini, W4A16 GPTQ (~16 GB) | DSpark | ~268K |
 | **q27** | llama.cpp b11887 | Qwen3.8-27B dense, Unsloth UD-Q5_K_XL, KV q8_0, 4 slots | MTP draft head, n-max 2 | 32K |
 | **ninfer** | ninfer-3090 v0.16 | Qwen3.8-27B, its own 4/6-bit format (17.7 GiB) | DFlash2, K=7 | 237K |
@@ -65,11 +71,15 @@ as the default. We have since removed ninfer from the machine to free disk space
 | **ninfer** | 102 prose / 147 code ³ | one lane only | 2,818 / 2,557 | not tested | not tested | not tested |
 | **Strata Q5** | 67 | 57 (4) ⁴ | 948 / 2,935 | 10/10 | **8/8 / 8/8** ² | **good / good** ² |
 | **Strata Q4** | **80** | 69 (4) ⁴ | 1,228 / 3,102 | 10/10 | not tested | not tested |
+| **HyperQwen 150K** ⁵ | 98 | **402** (6) | 1,771 / 1,594 | not tested | not tested | not tested |
+| **HyperQwen 240K** ⁵ | 117 | 208 (4; 2 slots) | 1,745 / 1,597 | not tested | not tested | not tested |
 
 ¹ All failures were **no code at all**: the model used the whole 8,000-token budget for thinking.
 ² Measured at 250 W (24–25 November). Scores don't depend on power, but times do.
 ³ Prose at 370 W. Code at 300 W with a clock lock (2026-11-19, other prompts).
 ⁴ Strata's DFlash2 serves one request at a time, so parallel requests don't add throughput.
+⁵ First measured on 27 November, with `iommu=pt`. The other rows are from before `iommu=pt`; the rerun is
+[below](#iommupt-and-a-full-rerun-27-november).
 
 ## Speed
 
@@ -143,6 +153,76 @@ Same session and settings: 256K context, int8 KV (32K in VRAM), DFlash2, vision 
 - The Strata engine update 0.1.60 → 0.1.69 gave **no real decode gain** for Q5 on this machine. It was +6% just after a
   start, then the same once warm (65.0–65.3 vs 65.0 tok/s by the third run). The release notes' 3090 gains were
   measured on smaller quants that keep more on the GPU.
+
+### `iommu=pt` and a full rerun (27 November)
+
+The kernel's IOMMU translated every DMA transfer (all 54 IOMMU groups were `DMA-FQ`). Strata's docs say pinned
+RAM↔GPU copies ran slower that way. We booted once with `iommu=pt` (pass-through: the IOMMU stays on, host devices
+skip translation), using a one-time GRUB entry so that a power cycle would fall back to the old boot. Then we made it
+permanent. gpu-unlock kept working, and there were no Xid errors. Every setup was then started fresh and measured with
+the same scripts; ninfer is no longer installed.
+
+Decode, total tok/s, before → after (1 request: mean of 3 runs):
+
+| Setup | 1 request | 2 | 4 | 6 |
+|---|---|---|---|---|
+| HyperQwen 64K | 129 → 129 | 228 ¹ → 234 | 361 → 358 | 371 → 365 |
+| HyperQwen 150K (MTP) | new: **98** | 184 | 334 | **402** |
+| HyperQwen 240K (KVarN, 2 slots) | new: **117** | 127 ² | 208 | – |
+| q27 (llama.cpp) | 58 → 57 | – | 132 → 130 | 104 → 103 |
+| Inkling | 145 → 142 | 210 ¹ → 218 | 314 → 299 | 402 → 387 |
+| Strata Q5 128K / 256K | 67 → 68 / 67 → 67 | 59 → 59 / 59 → 60 | 57 → 56 / 57 → 56 | – |
+| Strata Q4 128K / 256K | new: 82 / 80 → 81 | 72 / 71 → 71 | 71 / 69 → 68 | – |
+
+¹ Before gpu-unlock (no later number). ² The second request waited 3.5 s for a slot.
+
+Prefill, tok/s, before → after:
+
+| Setup | 8K | 30K | 60K |
+|---|---|---|---|
+| HyperQwen 64K | 1,880 → 1,831 | 1,720 → 1,675 | 1,522 → 1,491 |
+| HyperQwen 150K / 240K | new: 1,771 / 1,745 | 1,594 / 1,597 | 1,389 / 1,423 |
+| q27 | 1,128 → 1,102 | 1,098 → 1,075 | – (32K context) |
+| **Inkling** | 4,632 → **5,242 (+13%)** | 3,993 → **4,577 (+15%)** | 3,590 → 3,794 (+6%) |
+| **Strata Q5** (256K) | 948 → **1,015 (+7%)** | 2,939 → 3,008 (+2%) | – → 2,942 |
+| **Strata Q4** (256K) | 1,220 → **1,312 (+8%)** | 3,090 → 3,086 | – → 3,110 |
+
+- **Who gains:** the engines that copy a lot between RAM and GPU while reading a prompt. Strata streams the experts the
+  card doesn't hold; Inkling keeps a 16 GB prompt cache in RAM. During Strata's prefill, PCIe bursts now reach ~12 GB/s
+  (8.7 before). HyperQwen and llama.cpp keep everything in VRAM and gain nothing; HyperQwen's −2–3% is one run.
+- **Decode didn't change** for any setup (within ±3%; Inkling's single-request runs alone spread 132–150).
+- **HyperQwen 150K is the best multi-user setup** (402 tok/s total at 6 requests), at ~25% less single-request speed
+  than 64K. 240K is faster for one request but has only 2 slots. Long-context quality is not tested yet.
+- Strata Q4 runs at the same speed with 128K and 256K context; the larger context costs only RAM.
+
+### Tuning Strata on this machine: what did not help
+
+After readers suggested CPU-side tuning (one gained ~10% decode on a DeepSeek MoE, whose RAM delivered only 33 of 90 GB/s),
+we tried everything we could find on Strata Q4 (256K). Each variant was a fresh start plus 3 × 512 tokens; runs vary by about ±3 tok/s.
+
+| Variant | Decode, mean tok/s |
+|---|---|
+| Baseline | 80.8 |
+| Huge pages for the 71.7 GiB expert arena (`STRATA_ARENA_THP=1`) | 79.3 |
+| `--pool-workers` 21 / 16 / 12 (default 20 on 22 cores) | 81.7 / 80.1 / ~74 |
+| `--pool-tasks 126` (default 63) / `--aux-cpus auto` / `--host-core sibling` | 79.8 / 81.0 / 79.2 |
+| GPU at 390 W instead of 370 W | 80.4 |
+| More VRAM for experts (`--kv-resident 20480`, 5,350 instead of 5,299 expert slots) | 80.7 |
+| DFlash2 `--spec` 4 / 5 / 8 (default 6, `--draft-conf 0.7`) | 80.8 / 82.3 / 78.5 |
+| `--draft-conf` 0.5 / 0.85 | **75.7** / 80.5 |
+
+- **RAM bandwidth actually used** during decode, from the memory controllers' counters (`perf stat` with
+  `uncore_imc_*/cas_count_read/`, run as root): **24.6 GB/s** of the theoretical 76.8, with all four channels equal.
+- So the RAM has room to spare and the CPU pool is not on the critical path: 16 workers are as fast as 20, and huge pages
+  change nothing. The GPU draws 340–350 W during single-request decode, and at 390 W its clock barely moves
+  (~1,890 → 1,905 MHz). **On this box Strata Q4 decode is limited by the GPU side.** Q5 (more experts in RAM) may behave
+  differently; we haven't tested it.
+- The DFlash2 defaults are right: a lower `--draft-conf` drafts 50% more tokens but gets few more accepted, and the GPU pays
+  for checking the rejected ones.
+- Long answers are faster than these 512-token runs: 2,048 tokens gave 86–87 tok/s, because Strata keeps adapting which
+  experts it holds in VRAM.
+- If you script Strata's launcher: `strata launch` keeps the flags in its own launch preset and keeps the first copy of a
+  flag, so a flag you add once sticks there until you remove it.
 
 ## Inkling: exact configuration and the 600+ tok/s reports
 
@@ -335,8 +415,9 @@ reference solutions before blaming the model.
 
 ## What we take from this
 
-- **Default for chat, writing and tools: HyperQwen.** It gives the 27B's quality at 2–3.6x llama.cpp's speed and handles
-  6 chats at once. It is young software, so we keep llama.cpp (q27) as the fallback.
+- **For chat, writing and tools with several users: HyperQwen.** It gives the 27B's quality at 2–3.6x llama.cpp's speed
+  and handles 6 chats at once. It is young software, so we keep llama.cpp (q27) as the fallback. Since 27 November our own
+  default is Strata Q4 (the 125B, one user at a time).
 - **For Dutch (or English) text that customers will read:** HyperQwen, q27 or Strata. Not Inkling.
 - **For small agents and scripts:** Inkling is the fastest, if your tool schemas stay flat (no arrays of objects) or
   your agent loop validates and repairs JSON arguments.
@@ -346,17 +427,21 @@ reference solutions before blaming the model.
   budget is the next thing to test.
 - **Power:** going from 250 W to 370 W gave +17–21% on the power-capped vLLM engine and little elsewhere. gpu-unlock
   gave more: +26–49% prefill on the vLLM engines.
+- **`iommu=pt` is free speed** for engines that copy a lot between RAM and GPU (Strata, Inkling's RAM prompt cache):
+  +7–15% prefill. Engines that keep everything in VRAM gain nothing.
+- **Several users at once: HyperQwen 150K.** Strata, the 125B, answers one request at a time.
 
 ## Caveats
 
 - Small samples: 10 writing prompts with one answer each (plus 20 repeated price replies), 10 tool tasks, and 8 coding
   tasks with 1–7 runs each.
 - We judged the writing quality by hand.
-- Rows come from 17–26 November 2026. The quality tests partly ran at 250 W (marked). Scores don't depend on power, but
+- Rows come from 17–27 November 2026. The quality tests partly ran at 250 W (marked). Scores don't depend on power, but
   times do. Our speed prompts are short free prose. Code, summaries and long prompts behave differently, especially
   with speculative decoding.
 - Our system prompt said "say the seller will check it", which may have pushed Inkling towards the third person.
-- Not yet tested: Strata Q4 quality on our tasks; HyperQwen at 150K/240K context; recall at 200K+ tokens on any setup.
+- Not yet tested: Strata Q4 quality on our tasks; HyperQwen 150K/240K quality (only speed measured); recall at 200K+
+  tokens on any setup.
 
 ## Rerun it
 
